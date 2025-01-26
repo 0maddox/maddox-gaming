@@ -1,0 +1,11 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  name: MyString
+  date: 2025-01-26 16:41:04
+  entry_fee: 9.99
+
+two:
+  name: MyString
+  date: 2025-01-26 16:41:04
+  entry_fee: 9.99
