@@ -1,0 +1,166 @@
+.admin-dashboard {
+  padding: 24px;
+  max-width: 1400px;
+  margin: 0 auto;
+
+  .admin-header {
+    margin-bottom: 32px;
+
+    h1 {
+      font-size: 28px;
+      margin-bottom: 24px;
+    }
+  }
+
+  .admin-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 24px;
+    margin-bottom: 32px;
+
+    .stat-card {
+      background: white;
+      padding: 24px;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+
+      h3 {
+        color: var(--pinterest-gray);
+        font-size: 16px;
+        margin-bottom: 8px;
+      }
+
+      p {
+        font-size: 24px;
+        font-weight: 600;
+        color: var(--pinterest-dark);
+      }
+    }
+  }
+
+  .users-table-container {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+
+    .users-table {
+      width: 100%;
+      border-collapse: collapse;
+
+      th, td {
+        padding: 16px;
+        text-align: left;
+        border-bottom: 1px solid var(--pinterest-light-gray);
+      }
+
+      th {
+        background: #f8f9fa;
+        font-weight: 600;
+        color: var(--pinterest-gray);
+      }
+
+      .user-info {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+
+        img {
+          width: 32px;
+          height: 32px;
+          border-radius: 50%;
+          object-fit: cover;
+        }
+      }
+
+      .role-badge {
+        padding: 4px 8px;
+        border-radius: 12px;
+        font-size: 12px;
+        font-weight: 500;
+
+        &.admin {
+          background: #ffe2e5;
+          color: #ff4d4f;
+        }
+
+        &.moderator {
+          background: #e6f7ff;
+          color: #1890ff;
+        }
+
+        &.user {
+          background: #f6ffed;
+          color: #52c41a;
+        }
+      }
+
+      .contact-info {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        font-size: 14px;
+
+        a {
+          color: var(--pinterest-red);
+          text-decoration: none;
+
+          &:hover {
+            text-decoration: underline;
+          }
+        }
+      }
+
+      .action-buttons {
+        display: flex;
+        gap: 8px;
+
+        button {
+          padding: 6px 12px;
+          border-radius: 6px;
+          border: none;
+          font-size: 14px;
+          cursor: pointer;
+          transition: all 0.2s ease;
+
+          &.edit-btn {
+            background: #e6f7ff;
+            color: #1890ff;
+
+            &:hover {
+              background: #bae7ff;
+            }
+          }
+
+          &.delete-btn {
+            background: #fff1f0;
+            color: #ff4d4f;
+
+            &:hover {
+              background: #ffa39e;
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+.admin-unauthorized {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 400px;
+  font-size: 24px;
+  color: var(--pinterest-gray);
+}
+
+.admin-loading,
+.admin-error {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 400px;
+  font-size: 18px;
+  color: var(--pinterest-gray);
+} 

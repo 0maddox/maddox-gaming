@@ -1,0 +1,329 @@
+.home-container {
+  padding: 0;
+  overflow-x: hidden;
+}
+
+// Hero Section
+.hero-section {
+  height: 60vh;
+  background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)),
+              url('/hero-bg.jpg') center/cover;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  color: white;
+  margin-bottom: 40px;
+
+  .hero-content {
+    h1 {
+      font-size: 3.5rem;
+      margin-bottom: 1rem;
+    }
+
+    p {
+      font-size: 1.5rem;
+      opacity: 0.9;
+    }
+  }
+}
+
+// Common Section Styles
+.section {
+  padding: 40px 20px;
+  margin-bottom: 40px;
+
+  .section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+    padding: 0 20px;
+
+    h2 {
+      font-size: 24px;
+      font-weight: 600;
+    }
+
+    .view-all {
+      color: var(--pinterest-red);
+      text-decoration: none;
+      font-weight: 500;
+      
+      &:hover {
+        text-decoration: underline;
+      }
+    }
+  }
+}
+
+// Tournaments Section
+.tournaments-section {
+  .tournaments-grid {
+    overflow: hidden;
+    
+    .scroll-container {
+      display: flex;
+      gap: 24px;
+      padding: 20px;
+      overflow-x: auto;
+      scroll-snap-type: x mandatory;
+      -webkit-overflow-scrolling: touch;
+      
+      &::-webkit-scrollbar {
+        height: 8px;
+      }
+      
+      &::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 4px;
+      }
+      
+      &::-webkit-scrollbar-thumb {
+        background: #888;
+        border-radius: 4px;
+      }
+    }
+  }
+
+  .tournament-card {
+    flex: 0 0 calc(33.333% - 16px);
+    min-width: 300px;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    scroll-snap-align: start;
+    background: white;
+    transition: transform 0.3s ease;
+
+    &:hover {
+      transform: translateY(-4px);
+    }
+
+    .tournament-image {
+      position: relative;
+      height: 200px;
+
+      img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+
+      .tournament-date {
+        position: absolute;
+        bottom: 16px;
+        right: 16px;
+        background: rgba(0, 0, 0, 0.8);
+        color: white;
+        padding: 8px 12px;
+        border-radius: 20px;
+        font-size: 14px;
+      }
+    }
+
+    .tournament-info {
+      padding: 20px;
+
+      h3 {
+        margin-bottom: 8px;
+        font-size: 18px;
+      }
+
+      p {
+        color: var(--pinterest-gray);
+        margin-bottom: 16px;
+      }
+
+      .tournament-meta {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 16px;
+        font-size: 14px;
+        color: var(--pinterest-gray);
+      }
+
+      .join-button {
+        display: block;
+        text-align: center;
+        padding: 12px;
+        background: var(--pinterest-red);
+        color: white;
+        text-decoration: none;
+        border-radius: 8px;
+        transition: background-color 0.2s ease;
+
+        &:hover {
+          background-color: darken(#e60023, 10%);
+        }
+      }
+    }
+  }
+}
+
+// Products Section
+.products-section {
+  .products-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 24px;
+    padding: 20px;
+  }
+
+  .product-card {
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    background: white;
+    transition: transform 0.3s ease;
+
+    &:hover {
+      transform: translateY(-4px);
+    }
+
+    .product-image {
+      height: 300px;
+
+      img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+    }
+
+    .product-info {
+      padding: 20px;
+
+      h3 {
+        margin-bottom: 8px;
+        font-size: 18px;
+      }
+
+      p {
+        color: var(--pinterest-gray);
+        margin-bottom: 16px;
+      }
+
+      .product-price {
+        font-size: 24px;
+        font-weight: 600;
+        color: var(--pinterest-red);
+        margin-bottom: 16px;
+      }
+
+      .buy-button {
+        display: block;
+        text-align: center;
+        padding: 12px;
+        background: var(--pinterest-black);
+        color: white;
+        text-decoration: none;
+        border-radius: 8px;
+        transition: background-color 0.2s ease;
+
+        &:hover {
+          background-color: var(--pinterest-red);
+        }
+      }
+    }
+  }
+}
+
+// Content Section
+.content-section {
+  .content-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 24px;
+    padding: 20px;
+  }
+
+  .content-card {
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    background: white;
+    transition: transform 0.3s ease;
+
+    &:hover {
+      transform: translateY(-4px);
+    }
+
+    .content-image {
+      position: relative;
+      height: 200px;
+
+      img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+
+      .content-type {
+        position: absolute;
+        top: 16px;
+        left: 16px;
+        background: rgba(0, 0, 0, 0.8);
+        color: white;
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 12px;
+      }
+    }
+
+    .content-info {
+      padding: 16px;
+
+      h3 {
+        margin-bottom: 8px;
+        font-size: 16px;
+      }
+
+      .content-meta {
+        display: flex;
+        justify-content: space-between;
+        font-size: 12px;
+        color: var(--pinterest-gray);
+      }
+    }
+  }
+}
+
+// Responsive Design
+@media (max-width: 1200px) {
+  .content-section .content-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+@media (max-width: 992px) {
+  .content-section .content-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .products-section .products-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .content-section .content-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .hero-section .hero-content {
+    h1 {
+      font-size: 2.5rem;
+    }
+    
+    p {
+      font-size: 1.2rem;
+    }
+  }
+}
+
+@media (max-width: 480px) {
+  .content-section .content-grid {
+    grid-template-columns: 1fr;
+  }
+} 
