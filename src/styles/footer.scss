@@ -1,0 +1,156 @@
+.footer {
+  position: relative;
+  width: 100%;
+  background: #1a1a1a;
+  color: #fff;
+  padding: 40px 0;
+  margin-top: auto;
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
+  
+  // Pinterest-style container
+  .footer-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 30px;
+    
+    // Footer sections
+    .footer-section {
+      h3 {
+        color: #fff;
+        font-size: 1.2rem;
+        margin-bottom: 20px;
+        position: relative;
+        
+        &:after {
+          content: '';
+          position: absolute;
+          left: 0;
+          bottom: -8px;
+          width: 40px;
+          height: 2px;
+          background: #e60023; // Pinterest red
+          transition: width 0.3s ease;
+        }
+        
+        &:hover:after {
+          width: 60px;
+        }
+      }
+      
+      // Links with Pinterest hover effect
+      a {
+        display: block;
+        color: #b0b0b0;
+        text-decoration: none;
+        padding: 8px 0;
+        transition: all 0.3s ease;
+        position: relative;
+        
+        &:before {
+          content: '';
+          position: absolute;
+          left: 0;
+          bottom: 0;
+          width: 0;
+          height: 1px;
+          background: #e60023;
+          transition: width 0.3s ease;
+        }
+        
+        &:hover {
+          color: #fff;
+          transform: translateX(10px);
+          
+          &:before {
+            width: 100%;
+          }
+        }
+      }
+    }
+    
+    // Social media icons
+    .social-links {
+      display: flex;
+      gap: 15px;
+      margin-top: 20px;
+      
+      a {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: #333;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.3s ease;
+        
+        &:hover {
+          background: #e60023;
+          transform: translateY(-5px);
+        }
+        
+        i {
+          color: #fff;
+          font-size: 1.2rem;
+        }
+      }
+    }
+  }
+  
+  // Bottom bar
+  .footer-bottom {
+    margin-top: 40px;
+    padding-top: 20px;
+    border-top: 1px solid #333;
+    text-align: center;
+    
+    p {
+      color: #b0b0b0;
+      font-size: 0.9rem;
+      
+      a {
+        color: #fff;
+        text-decoration: none;
+        transition: color 0.3s ease;
+        
+        &:hover {
+          color: #e60023;
+        }
+      }
+    }
+  }
+}
+
+// Smooth scroll effect
+html {
+  scroll-behavior: smooth;
+}
+
+// Responsive adjustments
+@media (max-width: 768px) {
+  .footer {
+    .footer-content {
+      grid-template-columns: 1fr;
+      text-align: center;
+      
+      .footer-section {
+        h3:after {
+          left: 50%;
+          transform: translateX(-50%);
+        }
+        
+        a:hover {
+          transform: translateX(0);
+        }
+      }
+      
+      .social-links {
+        justify-content: center;
+      }
+    }
+  }
+} 

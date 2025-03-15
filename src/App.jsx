@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { Routes, Route } from 'react-router-dom';
 import { ScrollProvider, useScroll } from './context/ScrollContext';
 import { AuthProvider } from './context/AuthContext';

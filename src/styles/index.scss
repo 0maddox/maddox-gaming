@@ -1,0 +1,27 @@
+// Modern imports using @use
+@use 'sass:color';
+@use 'sass:math';
+
+// Bootstrap
+@use '~bootstrap/scss/bootstrap';
+
+// Base styles
+@use './base/variables';
+@use './base/mixins';
+@use './base/typography';
+
+// Components
+@use './components/navbar';
+@use './components/sidebar';
+@use './components/footer';
+@use './components/buttons';
+@use './components/cards';
+
+// Pages
+@use './pages/home';
+@use './pages/shop';
+@use './pages/tournaments';
+@use './pages/content';
+
+// Layout
+@use './layout'; 
