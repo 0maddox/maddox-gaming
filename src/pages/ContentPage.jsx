@@ -1,4 +1,3 @@
-// src/pages/ContentPage.js
 import React, { useState, useEffect } from 'react';
 
 function ContentPage() {

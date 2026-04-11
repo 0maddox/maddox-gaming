@@ -1,4 +1,3 @@
-// src/pages/TournamentsPage.js
 import React, { useState, useEffect } from 'react';
 
 function TournamentsPage() {

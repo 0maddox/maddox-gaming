@@ -6,70 +6,81 @@ function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const navigate = useNavigate();
   const { login } = useAuth();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const success = await login(email, password);
+    setError('');
+    setIsSubmitting(true);
+    const result = await login(email.trim(), password);
     
-    if (success) {
-      navigate('/');
+    if (result.success) {
+      navigate('/shop');
     } else {
-      setError('Invalid email or password');
+      setError(result.error || 'Invalid email or password');
     }
+
+    setIsSubmitting(false);
   };
 
   return (
-    <div className="container py-5">
-      <div className="row justify-content-center">
-        <div className="col-md-6 col-lg-4">
-          <div className="card bg-dark text-white">
-            <div className="card-body">
-              <h2 className="text-center mb-4 text-blue-400">Login</h2>
-              {error && <div className="alert alert-danger">{error}</div>}
-              <form onSubmit={handleSubmit}>
-                <div className="mb-3">
-                  <label htmlFor="email" className="form-label">Email</label>
-                  <input
-                    type="email"
-                    className="form-control"
-                    id="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
-                  />
-                </div>
-                <div className="mb-3">
-                  <label htmlFor="password" className="form-label">Password</label>
-                  <input
-                    type="password"
-                    className="form-control"
-                    id="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                  />
-                </div>
-                <button type="submit" className="btn bg-blue-500 text-white w-100 hover:bg-white hover:text-blue-500">
-                  Login
-                </button>
-                
-                <div className="text-center mt-4">
-                  <p className="mb-2">Don't have an account?</p>
-                  <Link 
-                    to="/signup" 
-                    className="btn bg-white text-blue-500 w-100 hover:bg-blue-500 hover:text-white"
-                  >
-                    Sign Up
-                  </Link>
-                </div>
-              </form>
-            </div>
-          </div>
+    <section className="auth-shell">
+      <div className="auth-backdrop" aria-hidden="true" />
+      <div className="auth-card glass-card">
+        <div className="auth-header">
+          <p className="auth-kicker">Welcome Back</p>
+          <h2>Login</h2>
+          <p>Access your profile, cart, and tournament registrations.</p>
         </div>
+
+        {error ? <div className="auth-alert">{error}</div> : null}
+
+        <form onSubmit={handleSubmit} className="auth-form-grid">
+          <div>
+            <label htmlFor="email" className="auth-label">Email</label>
+            <input
+              type="email"
+              className="form-control auth-control"
+              id="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              autoComplete="email"
+              placeholder="you@example.com"
+              required
+            />
+          </div>
+
+          <div>
+            <label htmlFor="password" className="auth-label">Password</label>
+            <input
+              type="password"
+              className="form-control auth-control"
+              id="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              autoComplete="current-password"
+              placeholder="Enter your password"
+              required
+            />
+          </div>
+
+          <div className="auth-button-row">
+            <button type="submit" className="btn-gold auth-btn-primary" disabled={isSubmitting}>
+              {isSubmitting ? 'Signing In...' : 'Login'}
+            </button>
+            <Link to="/signup" className="btn-outline-gold auth-btn-secondary">
+              Create Account
+            </Link>
+          </div>
+
+          <p className="auth-footer-note">
+            New here? <Link to="/signup">Sign up and join the community</Link>
+          </p>
+        </form>
       </div>
-    </div>
+    </section>
   );
 }
 

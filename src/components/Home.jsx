@@ -2,6 +2,19 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 
 function Home() {
+  const handleHorizontalWheel = (event) => {
+    const container = event.currentTarget;
+    if (!container) return;
+
+    if (Math.abs(event.deltaY) > Math.abs(event.deltaX)) {
+      event.preventDefault();
+      container.scrollBy({
+        left: event.deltaY,
+        behavior: 'smooth',
+      });
+    }
+  };
+
   // Sample data - replace with your actual data
   const tournaments = [
     {
@@ -52,27 +65,56 @@ function Home() {
 
       {/* Tournaments Section */}
       <section className="section tournaments-section">
-        <div className="section-header">
-          <h2>Upcoming Tournaments</h2>
-          <Link to="/tournaments" className="view-all">View All</Link>
-        </div>
-        <div className="tournaments-grid">
-          <div className="scroll-container">
-            {tournaments.map(tournament => (
-              <div key={tournament.id} className="tournament-card">
-                <div className="tournament-image">
-                  <img src={tournament.image} alt={tournament.title} />
-                  <div className="tournament-date">{tournament.date}</div>
-                </div>
-                <div className="tournament-info">
-                  <h3>{tournament.title}</h3>
-                  <p>{tournament.description}</p>
-                  <div className="tournament-meta">
-                    <span>{tournament.game}</span>
-                    <span>{tournament.participants}</span>
+        <div className="section-inner">
+          <div className="section-header">
+            <h2>Upcoming Tournaments</h2>
+            <Link to="/tournaments" className="view-all">View All</Link>
+          </div>
+          <div className="tournaments-grid">
+            <div className="scroll-container" onWheel={handleHorizontalWheel}>
+              {tournaments.map(tournament => (
+                <div key={tournament.id} className="tournament-card">
+                  <div className="tournament-image">
+                    <img src={tournament.image} alt={tournament.title} />
+                    <div className="tournament-date">{tournament.date}</div>
                   </div>
-                  <Link to={`/tournaments/${tournament.id}`} className="join-button">
-                    Join Tournament
+                  <div className="tournament-info">
+                    <h3>{tournament.title}</h3>
+                    <p>{tournament.description}</p>
+                    <div className="tournament-meta">
+                      <span>{tournament.game}</span>
+                      <span>{tournament.participants}</span>
+                    </div>
+                    <Link to={`/tournaments/${tournament.id}`} className="join-button">
+                      Join Tournament
+                    </Link>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Products Section */}
+      <section className="section products-section">
+        <div className="section-inner">
+          <div className="section-header">
+            <h2>Featured Products</h2>
+            <Link to="/shop" className="view-all">View All</Link>
+          </div>
+          <div className="products-grid">
+            {products.map(product => (
+              <div key={product.id} className="product-card">
+                <div className="product-image">
+                  <img src={product.image} alt={product.name} />
+                </div>
+                <div className="product-info">
+                  <h3>{product.name}</h3>
+                  <p>{product.description}</p>
+                  <div className="product-price">${product.price}</div>
+                  <Link to={`/shop/${product.id}`} className="buy-button">
+                    View Details
                   </Link>
                 </div>
               </div>
@@ -81,53 +123,30 @@ function Home() {
         </div>
       </section>
 
-      {/* Products Section */}
-      <section className="section products-section">
-        <div className="section-header">
-          <h2>Featured Products</h2>
-          <Link to="/shop" className="view-all">View All</Link>
-        </div>
-        <div className="products-grid">
-          {products.map(product => (
-            <div key={product.id} className="product-card">
-              <div className="product-image">
-                <img src={product.image} alt={product.name} />
-              </div>
-              <div className="product-info">
-                <h3>{product.name}</h3>
-                <p>{product.description}</p>
-                <div className="product-price">${product.price}</div>
-                <Link to={`/shop/${product.id}`} className="buy-button">
-                  View Details
-                </Link>
-              </div>
-            </div>
-          ))}
-        </div>
-      </section>
-
       {/* Content Section */}
       <section className="section content-section">
-        <div className="section-header">
-          <h2>Latest Content</h2>
-          <Link to="/content" className="view-all">View All</Link>
-        </div>
-        <div className="content-grid">
-          {content.map(item => (
-            <div key={item.id} className="content-card">
-              <div className="content-image">
-                <img src={item.image} alt={item.title} />
-                <div className="content-type">{item.type}</div>
-              </div>
-              <div className="content-info">
-                <h3>{item.title}</h3>
-                <div className="content-meta">
-                  <span>{item.author}</span>
-                  <span>{item.readTime}</span>
+        <div className="section-inner">
+          <div className="section-header">
+            <h2>Latest Content</h2>
+            <Link to="/content" className="view-all">View All</Link>
+          </div>
+          <div className="content-grid">
+            {content.map(item => (
+              <div key={item.id} className="content-card">
+                <div className="content-image">
+                  <img src={item.image} alt={item.title} />
+                  <div className="content-type">{item.type}</div>
+                </div>
+                <div className="content-info">
+                  <h3>{item.title}</h3>
+                  <div className="content-meta">
+                    <span>{item.author}</span>
+                    <span>{item.readTime}</span>
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
       </section>
     </div>

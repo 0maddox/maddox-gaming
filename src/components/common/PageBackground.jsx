@@ -25,7 +25,7 @@ function PageBackground() {
     <div
       style={{
         position: 'fixed',
-        top: '0',           // Changed from 56px to 0
+        top: '0',
         left: 0,
         right: 0,
         bottom: 0,
@@ -33,9 +33,9 @@ function PageBackground() {
         backgroundSize: 'cover',
         backgroundPosition: 'center',
         backgroundRepeat: 'no-repeat',
-        zIndex: 0,          // Changed from -1 to 0
-        opacity: 0.6,       // Increased opacity
-        pointerEvents: 'none' // Allows clicking through the background
+        zIndex: -2,
+        opacity: 0.35,
+        pointerEvents: 'none'
       }}
     />
   );

@@ -1,7 +1,7 @@
 class Api::V1::ProductsController < ApplicationController
   skip_before_action :authenticate_request, only: [:index, :show]
   before_action :set_product, only: [:show, :update, :destroy]
-  before_action :check_admin, only: [:create, :update, :destroy]
+  before_action -> { require_permission!('manage_products') }, only: [:create, :update, :destroy]
 
   def index
     @products = Product.all
@@ -41,12 +41,6 @@ class Api::V1::ProductsController < ApplicationController
   end
 
   def product_params
-    params.require(:product).permit(:name, :description, :price, :stock)
-  end
-
-  def check_admin
-    unless current_user&.admin?
-      render json: { error: 'Unauthorized' }, status: :unauthorized
-    end
+    params.require(:product).permit(:name, :description, :price, :stock, :category, :image_url)
   end
 end

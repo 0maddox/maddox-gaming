@@ -1,6 +1,7 @@
 class Api::V1::TournamentsController < ApplicationController
   skip_before_action :authenticate_request, only: [:index, :show]
   before_action :set_tournament, only: [:show, :update, :destroy]
+  before_action -> { require_permission!('manage_tournaments') }, only: [:create, :update, :destroy]
 
   def index
     @tournaments = Tournament.all

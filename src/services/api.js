@@ -1,6 +1,11 @@
 import axios from 'axios';
 
-const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:3000/api/v1';
+const runtimeApiUrl =
+  typeof window !== 'undefined'
+    ? `${window.location.protocol}//${window.location.hostname}:3000/api/v1`
+    : 'http://localhost:3000/api/v1';
+
+const API_URL = process.env.REACT_APP_API_URL || runtimeApiUrl;
 
 const api = axios.create({
   baseURL: API_URL,
@@ -16,8 +21,16 @@ export const fetchTournaments = async () => {
   return response.data;
 };
 
+export const fetchShopFeed = async () => {
+  const response = await api.get('/shop_feed');
+  return response.data;
+};
+
 export const createRegistration = async (data) => {
-  const response = await api.post('/registrations', data);
+  const token = localStorage.getItem('token');
+  const response = await api.post('/registrations', data, {
+    headers: token ? { Authorization: `Bearer ${token}` } : {},
+  });
   return response.data;
 };
 

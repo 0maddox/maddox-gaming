@@ -1,83 +1,57 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { useScroll } from '../context/ScrollContext';
-import defaultAvatar from '../assets/default-avatar.png';
 
 function Navbar() {
   const { user, logout, hasPermission } = useAuth();
-  const { visible } = useScroll();
   const navigate = useNavigate();
-  const [searchQuery, setSearchQuery] = useState('');
+  const canAccessAdmin = hasPermission('access_admin');
+  const canManageTournaments = hasPermission('manage_tournaments');
+  const canManageProducts = hasPermission('manage_products');
+  const canManageContent = hasPermission('manage_content');
+  const canManageUsers = hasPermission('manage_users');
+  const canViewAnalytics = hasPermission('view_analytics');
 
-  const handleSearch = (e) => {
-    e.preventDefault();
-    if (searchQuery.trim()) {
-      navigate(`/search?q=${encodeURIComponent(searchQuery)}`);
-    }
+  const handleLogout = () => {
+    logout();
+    navigate('/login');
   };
 
   return (
-    <nav className={`pinterest-navbar ${visible ? 'navbar-visible' : 'navbar-hidden'}`}>
-      <div className="nav-content">
-        {/* Home Button */}
-        <Link to="/" className="nav-home-btn">
-          Home
-        </Link>
+    <header className="premium-nav-wrap">
+      <nav className="container-12 premium-nav">
+        <Link to="/" className="brand-mark">Maddox Gaming</Link>
 
-        {/* Search Bar */}
-        <form className="nav-search" onSubmit={handleSearch}>
-          <div className="search-wrapper">
-            <i className="fas fa-search search-icon"></i>
-            <input
-              type="search"
-              placeholder="Search"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-          </div>
-        </form>
+        <ul className="nav-center-links">
+          <li><Link to="/#products">Products</Link></li>
+          <li><Link to="/#tournaments">Tournaments</Link></li>
+          <li><Link to="/#about">About</Link></li>
+          <li><Link to="/#gallery">Gallery</Link></li>
+          <li><Link to="/shop">Shop</Link></li>
+          {user ? <li><Link to="/chat">Chat</Link></li> : null}
+          {canManageTournaments ? <li><Link to="/admin/tournaments">Manage Tournaments</Link></li> : null}
+          {canManageProducts ? <li><Link to="/admin/shop">Manage Shop</Link></li> : null}
+          {canManageContent ? <li><Link to="/admin/posts">Manage Content</Link></li> : null}
+          {canManageUsers ? <li><Link to="/admin/users">Manage Users</Link></li> : null}
+          {canViewAnalytics ? <li><Link to="/admin/analytics">Analytics</Link></li> : null}
+        </ul>
 
-        {/* Right Section */}
-        <div className="nav-right-section">
-          {user && (
+        <div className="nav-right-actions">
+          {user ? (
             <>
-              <button className="nav-icon-btn">
-                <i className="fas fa-bell"></i>
-              </button>
-              <button className="nav-icon-btn">
-                <i className="fas fa-comment-dots"></i>
-              </button>
+              {canAccessAdmin ? <Link to="/admin" className="btn-outline-gold">Dashboard</Link> : null}
+              <Link to="/profile" className="btn-outline-gold">Profile</Link>
+              <button type="button" className="btn-gold" onClick={handleLogout}>Logout</button>
+            </>
+          ) : (
+            <>
+              <Link to="/login" className="btn-outline-gold">Login</Link>
+              <Link to="/signup" className="btn-gold">Sign Up</Link>
             </>
           )}
-
-          {/* Profile/Login */}
-          {user ? (
-            <div className="nav-profile dropdown">
-              <button className="profile-btn dropdown-toggle" data-bs-toggle="dropdown">
-                <img src={user.profilePictureUrl || defaultAvatar} alt="Profile" className="profile-img" />
-              </button>
-              <ul className="dropdown-menu dropdown-menu-end">
-                <li><Link className="dropdown-item" to="/profile">Profile</Link></li>
-                {hasPermission('manage_users') && (
-                  <li><Link className="dropdown-item" to="/admin">Admin Dashboard</Link></li>
-                )}
-                <li><Link className="dropdown-item" to="/settings">Settings</Link></li>
-                <li><hr className="dropdown-divider" /></li>
-                <li><button className="dropdown-item" onClick={logout}>Logout</button></li>
-              </ul>
-            </div>
-          ) : (
-            <div className="nav-login-wrapper">
-              <div className="login-icon-container">
-                <img src={defaultAvatar} alt="Login" className="login-icon" />
-              </div>
-              <Link to="/login" className="nav-login-btn">Login</Link>
-            </div>
-          )}
         </div>
-      </div>
-    </nav>
+      </nav>
+    </header>
   );
 }
 
