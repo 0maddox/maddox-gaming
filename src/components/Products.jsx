@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
+import { fallbackProducts } from '../data/fallbackCatalog';
 import { createProductReview, fetchProductReviews, fetchProducts } from '../services/api';
 import { subscribeToLiveUpdates } from '../services/realtime';
 
@@ -14,8 +15,9 @@ const currency = new Intl.NumberFormat('en-KE', {
 
 function Products({ timing = {} }) {
   const navigate = useNavigate();
-  const [products, setProducts] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [products, setProducts] = useState(fallbackProducts);
+  const [loading, setLoading] = useState(false);
+  const [syncing, setSyncing] = useState(true);
   const [error, setError] = useState('');
   const [wishlisted, setWishlisted] = useState({});
   const [cartFeedback, setCartFeedback] = useState({});
@@ -37,16 +39,21 @@ function Products({ timing = {} }) {
         const response = await fetchProducts();
         const normalized = Array.isArray(response) ? response : [];
         if (mounted) {
-          setProducts(normalized);
-          setError('');
+          if (normalized.length > 0) {
+            setProducts(normalized);
+            setError('');
+          } else {
+            setError('Showing demo catalog while live products finish publishing.');
+          }
         }
       } catch (err) {
         if (mounted) {
-          setError('Unable to load products right now.');
+          setError('Showing demo catalog while the live store wakes up.');
         }
       } finally {
         if (mounted) {
           setLoading(false);
+          setSyncing(false);
         }
       }
     };
@@ -262,7 +269,8 @@ function Products({ timing = {} }) {
             ))}
           </div>
         ) : null}
-        {!loading && error ? <p className="section-status section-status-error">{error}</p> : null}
+        {syncing ? <p className="section-status">Loading live catalog...</p> : null}
+        {!loading && error ? <p className="section-status">{error}</p> : null}
 
         <div className="products-grid-premium">
           {featuredProducts.map((item, index) => {
@@ -285,7 +293,7 @@ function Products({ timing = {} }) {
             >
               <div className="product-image-wrap">
                 {badge ? <span className={`badge ${badge === 'HOT' ? 'badge-hot' : 'badge-new'}`}>{badge}</span> : null}
-                <img src="/images/shop-bg.jpg" alt={item.name || 'Product'} />
+                <img src={item.image_url || '/images/shop-bg.jpg'} alt={item.name || 'Product'} />
                 <div className="quick-icons">
                   <button
                     type="button"

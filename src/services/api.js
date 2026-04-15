@@ -182,6 +182,14 @@ export const fetchMyProfile = async (userId) => {
   return response.data;
 };
 
+export const updateMyProfile = async (userId, payload) => {
+  const token = localStorage.getItem('token');
+  const response = await api.patch(`/users/${userId}`, { user: payload }, {
+    headers: token ? { Authorization: `Bearer ${token}` } : {},
+  });
+  return response.data;
+};
+
 export const fetchFollows = async () => {
   const token = localStorage.getItem('token');
   const response = await api.get('/follows', {
@@ -275,7 +283,10 @@ export const adminApi = {
       },
       credentials: 'include' // This is important for Rails CSRF token
     });
-    if (!response.ok) throw new Error('Failed to fetch users');
+    if (!response.ok) {
+      const payload = await response.json().catch(() => ({}));
+      throw new Error(payload?.error || `Failed to fetch users (${response.status})`);
+    }
     return response.json();
   },
 

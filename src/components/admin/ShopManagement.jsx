@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { API_URL } from '../../config/env';
+import { uploadFileDirect } from '../../services/directUpload';
 
 const parseVariantLines = (text) => {
   return String(text || '')
@@ -63,6 +64,8 @@ function ShopManagement() {
           acc[item.id] = {
             low_stock_threshold: item.low_stock_threshold ?? 5,
             variantsText: toVariantLines(item.variants, item),
+            selectedImageFile: null,
+            imagePreviewUrl: item.image_url || '',
           };
           return acc;
         }, {})
@@ -94,6 +97,18 @@ function ShopManagement() {
     setStatusById((prev) => ({ ...prev, [productId]: { type: 'loading', message: 'Saving...' } }));
 
     try {
+      let imageSignedId;
+
+      if (form.selectedImageFile) {
+        setStatusById((prev) => ({
+          ...prev,
+          [productId]: { type: 'loading', message: 'Uploading image...' },
+        }));
+
+        const upload = await uploadFileDirect(form.selectedImageFile);
+        imageSignedId = upload.signedId;
+      }
+
       const response = await fetch(`${API_URL}/products/${productId}`, {
         method: 'PATCH',
         headers: {
@@ -104,6 +119,7 @@ function ShopManagement() {
           product: {
             low_stock_threshold: Number(form.low_stock_threshold || 0),
             variants: parseVariantLines(form.variantsText),
+            ...(imageSignedId ? { image_signed_id: imageSignedId } : {}),
           },
         }),
       });
@@ -114,6 +130,14 @@ function ShopManagement() {
 
       const updated = await response.json();
       setProducts((prev) => prev.map((item) => (item.id === updated.id ? updated : item)));
+      setFormById((prev) => ({
+        ...prev,
+        [productId]: {
+          ...(prev[productId] || {}),
+          selectedImageFile: null,
+          imagePreviewUrl: updated.image_url || prev[productId]?.imagePreviewUrl || '',
+        },
+      }));
       setStatusById((prev) => ({ ...prev, [productId]: { type: 'success', message: 'Saved' } }));
     } catch (err) {
       setStatusById((prev) => ({
@@ -130,6 +154,31 @@ function ShopManagement() {
   if (error) {
     return <p className="admin-shop-error">{error}</p>;
   }
+
+  const handleImageChange = (productId, file) => {
+    if (!file) {
+      setFormById((prev) => ({
+        ...prev,
+        [productId]: {
+          ...(prev[productId] || {}),
+          selectedImageFile: null,
+          imagePreviewUrl: products.find((item) => item.id === productId)?.image_url || '',
+        },
+      }));
+      return;
+    }
+
+    const previewUrl = URL.createObjectURL(file);
+
+    setFormById((prev) => ({
+      ...prev,
+      [productId]: {
+        ...(prev[productId] || {}),
+        selectedImageFile: file,
+        imagePreviewUrl: previewUrl,
+      },
+    }));
+  };
 
   return (
     <section className="admin-shop-panel">
@@ -149,6 +198,7 @@ function ShopManagement() {
           <thead>
             <tr>
               <th>Product</th>
+              <th>Image</th>
               <th>Stock</th>
               <th>Low-stock threshold</th>
               <th>Variants</th>
@@ -165,6 +215,25 @@ function ShopManagement() {
                   <td>
                     <strong>{item.name || 'Untitled'}</strong>
                     <div className="text-muted small">ID: {item.id}</div>
+                  </td>
+                  <td>
+                    <div className="d-flex flex-column gap-2">
+                      {form.imagePreviewUrl ? (
+                        <img
+                          src={form.imagePreviewUrl}
+                          alt={item.name || 'Product'}
+                          style={{ width: 80, height: 80, objectFit: 'cover', borderRadius: 12 }}
+                        />
+                      ) : (
+                        <div className="text-muted small">No image</div>
+                      )}
+                      <input
+                        className="form-control form-control-sm"
+                        type="file"
+                        accept="image/*"
+                        onChange={(event) => handleImageChange(item.id, event.target.files?.[0] || null)}
+                      />
+                    </div>
                   </td>
                   <td>
                     <span>{item.stock ?? 0}</span>

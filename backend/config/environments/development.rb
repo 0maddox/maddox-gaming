@@ -26,8 +26,8 @@ Rails.application.configure do
   # Change to :null_store to avoid any caching.
   config.cache_store = :memory_store
 
-  # Store uploaded files on the local file system (see config/storage.yml for options).
-  config.active_storage.service = :local
+  # Default to local storage in development but allow overriding for S3-compatible testing.
+  config.active_storage.service = ENV.fetch('ACTIVE_STORAGE_SERVICE', 'local').to_sym
 
   # Don't care if the mailer can't send.
   config.action_mailer.raise_delivery_errors = false
@@ -49,8 +49,14 @@ Rails.application.configure do
   # Make template changes take effect immediately.
   config.action_mailer.perform_caching = false
 
-  # Set localhost to be used by links generated in mailer templates.
-  config.action_mailer.default_url_options = { host: "localhost", port: 3000 }
+  # Set localhost to be used by links generated in mailer templates and blob URLs.
+  default_url_options = {
+    host: ENV.fetch('APP_HOST', 'localhost'),
+    port: ENV.fetch('APP_PORT', 3000),
+    protocol: ENV.fetch('APP_PROTOCOL', 'http')
+  }
+  config.action_mailer.default_url_options = default_url_options
+  Rails.application.routes.default_url_options = default_url_options
 
   # Print deprecation notices to the Rails logger.
   config.active_support.deprecation = :log
@@ -78,7 +84,10 @@ Rails.application.configure do
   config.action_cable.allowed_request_origins = [
     'http://localhost:3001',
     'http://127.0.0.1:3001',
-    %r{http://.*:3001}
+    'http://localhost:5173',
+    'http://127.0.0.1:5173',
+    %r{http://.*:3001},
+    %r{http://.*:5173}
   ]
 
   # Raise error when a before_action's only/except options reference missing actions.

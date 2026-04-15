@@ -53,26 +53,34 @@ class User < ApplicationRecord
             format: { with: /\A(?:\+254|0)[17]\d{8}\z/,
                       message: 'must be a valid Kenyan phone number' }
 
+  def as_api_json
+    as_json(except: [:password_digest]).merge(
+      'role' => resolved_role,
+      'profile_picture_url' => profile_picture_url,
+      'avatar_url' => profile_picture_url
+    )
+  end
+
   def profile_picture_url
     if profile_picture.attached?
-      Rails.application.routes.url_helpers.rails_blob_url(profile_picture, only_path: true)
+      Rails.application.routes.url_helpers.rails_blob_url(profile_picture)
     end
   end
 
   def can?(permission)
     allowed_roles = PERMISSIONS[permission.to_s] || []
-    allowed_roles.include?(role)
+		allowed_roles.include?(resolved_role)
   end
 
   def super_admin?
-    role == 'super_admin'
+		resolved_role == 'super_admin'
   end
 
   def community_profile_json
     codm_stats = CodmPlayerStat.where(player_name: username).order(updated_at: :desc).first
     matches_played = player_one_matches.count + player_two_matches.count
 
-    as_json(only: [:id, :username, :email, :role]).merge(
+    as_api_json.slice('id', 'username', 'email', 'role', 'profile_picture_url', 'avatar_url').merge(
       'avatar_url' => profile_picture_url,
       'stats' => {
         'followers' => received_follows.accepted.count,
@@ -86,13 +94,20 @@ class User < ApplicationRecord
     )
   end
 
+  def resolved_role
+    return self[:role] if has_attribute?('role') && self[:role].present?
+    return 'super_admin' if has_attribute?('admin') && self[:admin]
+
+    'user'
+  end
+
   private
 
   def normalize_role
-    self.role = role.presence || (admin ? 'super_admin' : 'user')
+		self.role = resolved_role if has_attribute?('role')
   end
 
   def sync_admin_flag
-    self.admin = (role == 'super_admin')
+		self.admin = (resolved_role == 'super_admin') if has_attribute?('admin')
   end
 end

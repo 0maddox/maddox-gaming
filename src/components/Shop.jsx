@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { fallbackShopItems } from '../data/fallbackCatalog';
 import { fetchShopFeed } from '../services/api';
 
 const SHOP_CATEGORIES = [
@@ -16,23 +17,26 @@ const SHOP_CATEGORIES = [
 ];
 
 function Shop() {
-  const [items, setItems] = useState([]);
-  const [sourceStatus, setSourceStatus] = useState({});
+  const [items, setItems] = useState(fallbackShopItems);
+  const [sourceStatus, setSourceStatus] = useState({ demo: 'ready' });
   const [sourceLinks, setSourceLinks] = useState({});
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
+  const [syncing, setSyncing] = useState(true);
   const [error, setError] = useState('');
 
   useEffect(() => {
     const loadShopData = async () => {
       try {
         const data = await fetchShopFeed();
-        setItems(Array.isArray(data?.items) ? data.items : []);
+        const liveItems = Array.isArray(data?.items) ? data.items : [];
+        setItems(liveItems.length > 0 ? liveItems : fallbackShopItems);
         setSourceStatus(data?.source_status || {});
         setSourceLinks(data?.source_links || {});
       } catch (err) {
-        setError('Unable to load shop feed right now.');
+        setError('Showing demo catalog while the live shop feed wakes up.');
       } finally {
         setLoading(false);
+        setSyncing(false);
       }
     };
 
@@ -106,8 +110,8 @@ function Shop() {
           </div>
         </section>
 
-        {loading && <p>Loading shop items...</p>}
-        {error && <p className="text-danger">{error}</p>}
+        {syncing ? <p>Loading live shop feed...</p> : null}
+        {error ? <p>{error}</p> : null}
 
         {!loading && !error && (
           <>

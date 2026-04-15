@@ -72,8 +72,15 @@ export function AuthProvider({ children }) {
     phoneNumber: rawUser?.phone_number || rawUser?.phoneNumber || '',
     role: rawUser?.role || (rawUser?.admin ? ROLES.SUPER_ADMIN : ROLES.USER),
     admin: Boolean(rawUser?.admin),
-    profilePictureUrl: rawUser?.profile_picture_url || null,
+    profilePictureUrl: rawUser?.profile_picture_url || rawUser?.avatar_url || null,
   });
+
+  const syncUser = (rawUser, fallbackEmail = user?.email || '') => {
+    const normalizedUser = normalizeUser(rawUser, fallbackEmail);
+    localStorage.setItem(USER_KEY, JSON.stringify(normalizedUser));
+    setUser(normalizedUser);
+    return normalizedUser;
+  };
 
   const login = async (email, password) => {
     try {
@@ -120,7 +127,7 @@ export function AuthProvider({ children }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, authReady, login, logout, hasPermission }}>
+    <AuthContext.Provider value={{ user, authReady, login, logout, hasPermission, syncUser }}>
       {children}
     </AuthContext.Provider>
   );

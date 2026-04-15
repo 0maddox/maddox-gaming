@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { API_URL } from '../config/env';
+import { uploadFileDirect } from '../services/directUpload';
 
 function Signup() {
   const [formData, setFormData] = useState({
@@ -11,6 +12,7 @@ function Signup() {
     phone_number: '',
   });
   const [profilePicture, setProfilePicture] = useState(null);
+  const [profilePreviewUrl, setProfilePreviewUrl] = useState('');
   const [error, setError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const navigate = useNavigate();
@@ -23,7 +25,16 @@ function Signup() {
   };
 
   const handleFileChange = (e) => {
-    setProfilePicture(e.target.files[0]);
+    const file = e.target.files?.[0] || null;
+    setProfilePicture(file);
+
+    if (!file) {
+      setProfilePreviewUrl('');
+      return;
+    }
+
+    const objectUrl = URL.createObjectURL(file);
+    setProfilePreviewUrl(objectUrl);
   };
 
   const handleSubmit = async (e) => {
@@ -42,20 +53,31 @@ function Signup() {
 
     setIsSubmitting(true);
 
-    const formDataToSend = new FormData();
-    Object.keys(formData).forEach(key => {
-      if (key !== 'confirmPassword') {
-        formDataToSend.append(`user[${key}]`, formData[key]);
-      }
-    });
-    if (profilePicture) {
-      formDataToSend.append('user[profile_picture]', profilePicture);
-    }
-
     try {
+      let profilePictureSignedId;
+
+      if (profilePicture) {
+        const upload = await uploadFileDirect(profilePicture);
+        profilePictureSignedId = upload.signedId;
+      }
+
+      const userPayload = Object.keys(formData).reduce((acc, key) => {
+        if (key !== 'confirmPassword') {
+          acc[key] = formData[key];
+        }
+        return acc;
+      }, {});
+
+      if (profilePictureSignedId) {
+        userPayload.profile_picture_signed_id = profilePictureSignedId;
+      }
+
       const response = await fetch(`${API_URL}/users`, {
         method: 'POST',
-        body: formDataToSend,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ user: userPayload }),
       });
 
       if (response.ok) {
@@ -172,6 +194,13 @@ function Signup() {
               onChange={handleFileChange}
               accept="image/*"
             />
+            {profilePreviewUrl ? (
+              <img
+                src={profilePreviewUrl}
+                alt="Profile preview"
+                style={{ width: 76, height: 76, borderRadius: '50%', objectFit: 'cover', marginTop: 12 }}
+              />
+            ) : null}
           </div>
 
           <div className="auth-button-row auth-button-row-wide">

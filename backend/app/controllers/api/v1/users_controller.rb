@@ -5,7 +5,7 @@ class Api::V1::UsersController < ApplicationController
 
   def index
     @users = User.all
-    render json: @users.as_json(except: [:password_digest])
+    render json: @users.map(&:as_api_json)
   end
 
   def show
@@ -23,9 +23,10 @@ class Api::V1::UsersController < ApplicationController
 
   def create
     @user = User.new(user_params)
+    attach_profile_picture(@user)
     if @user.save
       token = encode_token({ user_id: @user.id })
-      render json: { user: @user.as_json(except: [:password_digest]), token: token }, status: :created
+      render json: { user: @user.as_api_json, token: token }, status: :created
     else
       render json: @user.errors, status: :unprocessable_entity
     end
@@ -35,7 +36,7 @@ class Api::V1::UsersController < ApplicationController
     @user = User.find_by(email: params[:email])
     if @user && @user.authenticate(params[:password])
       token = encode_token({ user_id: @user.id })
-      render json: { user: @user.as_json(except: [:password_digest]), token: token }
+      render json: { user: @user.as_api_json, token: token }
     else
       render json: { error: "Invalid email or password" }, status: :unauthorized
     end
@@ -47,6 +48,7 @@ class Api::V1::UsersController < ApplicationController
     end
 
     attrs = user_update_params
+    attach_profile_picture(@user)
 
     if attrs[:role].present?
       unless current_user.can?('assign_roles')
@@ -76,13 +78,20 @@ class Api::V1::UsersController < ApplicationController
   end
 
   def user_params
-    params.require(:user).permit(:name, :username, :email, :password, :phone_number, :profile_picture)
+    params.require(:user).permit(:name, :username, :email, :password, :phone_number, :profile_picture, :profile_picture_signed_id)
   end
 
   def user_update_params
-    permitted = [:name, :username, :email, :password, :phone_number, :profile_picture]
+    permitted = [:name, :username, :email, :password, :phone_number, :profile_picture, :profile_picture_signed_id]
     permitted << :role if current_user&.can?('assign_roles')
     params.require(:user).permit(*permitted)
+  end
+
+  def attach_profile_picture(user)
+    signed_id = params.dig(:user, :profile_picture_signed_id).presence
+    return if signed_id.blank?
+
+    user.profile_picture.attach(signed_id)
   end
 
   def encode_token(payload)

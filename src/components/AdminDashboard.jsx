@@ -64,9 +64,12 @@ function AdminDashboard() {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
         }
       });
-      
-      if (!response.ok) throw new Error('Failed to fetch users');
-      
+
+      if (!response.ok) {
+        const payload = await response.json().catch(() => ({}));
+        throw new Error(payload?.error || `Failed to fetch users (${response.status})`);
+      }
+
       const data = await response.json();
       setUsers(data);
       const initialRoles = data.reduce((acc, item) => ({ ...acc, [item.id]: item.role || 'user' }), {});

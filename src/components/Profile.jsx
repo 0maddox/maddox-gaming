@@ -1,15 +1,33 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { fetchMyProfile } from '../services/api';
+import { uploadFileDirect } from '../services/directUpload';
+import { fetchMyProfile, updateMyProfile } from '../services/api';
 
 function Profile() {
-  const { user } = useAuth();
+  const { user, syncUser } = useAuth();
   const [profile, setProfile] = useState(null);
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [previewUrl, setPreviewUrl] = useState('');
+  const [status, setStatus] = useState('');
+  const [error, setError] = useState('');
+  const [uploading, setUploading] = useState(false);
 
   useEffect(() => {
     if (!user?.id) return;
     fetchMyProfile(user.id).then(setProfile).catch(() => {});
   }, [user]);
+
+  useEffect(() => {
+    if (!selectedFile) {
+      setPreviewUrl('');
+      return undefined;
+    }
+
+    const objectUrl = URL.createObjectURL(selectedFile);
+    setPreviewUrl(objectUrl);
+
+    return () => URL.revokeObjectURL(objectUrl);
+  }, [selectedFile]);
 
   const xpData = useMemo(() => {
     const stats = profile?.stats || {};
@@ -37,16 +55,64 @@ function Profile() {
     );
   }
 
+  const currentAvatar = previewUrl || profile?.avatar_url || user.profilePictureUrl || '';
+
+  const handleAvatarUpload = async () => {
+    if (!user?.id || !selectedFile) {
+      return;
+    }
+
+    setUploading(true);
+    setStatus('');
+    setError('');
+
+    try {
+      const upload = await uploadFileDirect(selectedFile);
+      const updatedProfile = await updateMyProfile(user.id, {
+        profile_picture_signed_id: upload.signedId,
+      });
+
+      setProfile(updatedProfile);
+      syncUser({ ...user, ...updatedProfile, email: updatedProfile.email || user.email });
+      setSelectedFile(null);
+      setStatus('Profile picture updated.');
+    } catch (err) {
+      setError(err?.message || 'Unable to upload profile picture.');
+    } finally {
+      setUploading(false);
+    }
+  };
+
   return (
     <div className="page-shell py-4">
       <div className="content-container">
         <h2>Profile</h2>
         <div className="card">
           <div className="card-body">
-            {user.profilePictureUrl ? <img src={user.profilePictureUrl} alt="Profile" style={{ width: 72, height: 72, borderRadius: '50%', objectFit: 'cover', marginBottom: 12 }} /> : null}
+            {currentAvatar ? <img src={currentAvatar} alt="Profile" style={{ width: 88, height: 88, borderRadius: '50%', objectFit: 'cover', marginBottom: 12 }} /> : null}
             <h3>{user.username}</h3>
             <p>Email: {user.email}</p>
             <p>Role: {user.role}</p>
+            <div style={{ display: 'grid', gap: 10, maxWidth: 360, marginBottom: 16 }}>
+              <label htmlFor="profile-picture-upload" className="auth-label">Profile Picture</label>
+              <input
+                id="profile-picture-upload"
+                type="file"
+                className="form-control auth-control"
+                accept="image/*"
+                onChange={(event) => setSelectedFile(event.target.files?.[0] || null)}
+              />
+              <button
+                type="button"
+                className="btn-gold"
+                onClick={handleAvatarUpload}
+                disabled={!selectedFile || uploading}
+              >
+                {uploading ? 'Uploading...' : 'Upload New Picture'}
+              </button>
+              {status ? <p className="section-status">{status}</p> : null}
+              {error ? <p className="section-status section-status-error">{error}</p> : null}
+            </div>
             <p>XP: {xpData.xp} | Level {xpData.level}</p>
             <div className="xp-progress-wrap">
               <div className="xp-progress-bar" style={{ width: `${xpData.progress}%` }} />

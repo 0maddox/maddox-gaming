@@ -14,6 +14,12 @@ Rails API for Maddox Gaming storefront, community features, and payment orchestr
 - `POST /api/v1/payments/flutterwave/webhook`: webhook receiver for Flutterwave confirmation.
 - `POST /api/v1/payments/mpesa/callback`: callback receiver for Daraja STK confirmation.
 
+## Upload Endpoints
+
+- `POST /api/v1/direct_uploads`: create a signed direct-upload payload for Active Storage.
+
+Use this endpoint from the React app before sending `image_signed_id` or `profile_picture_signed_id` to the normal product/user endpoints.
+
 ## Environment Variables
 
 Copy `.env.example` to your preferred shell environment and set:
@@ -23,6 +29,14 @@ Copy `.env.example` to your preferred shell environment and set:
 - `FLUTTERWAVE_API_URL`
 - `PAYMENT_BUSINESS_NAME`
 - `BASE_URL`
+- `ACTIVE_STORAGE_SERVICE`
+- `S3_ACCESS_KEY_ID`
+- `S3_SECRET_ACCESS_KEY`
+- `S3_BUCKET`
+- `S3_REGION`
+- `S3_ENDPOINT`
+- `S3_FORCE_PATH_STYLE`
+- `S3_PUBLIC`
 - `MPESA_CONSUMER_KEY`
 - `MPESA_SECRET`
 - `MPESA_SHORTCODE`
@@ -50,6 +64,17 @@ Current deployed backend values:
 - `MPESA_CALLBACK_URL=https://maddox-gaming.onrender.com/api/mpesa/callback`
 
 Card payments require the Flutterwave values. M-Pesa payments require the Daraja values.
+
+User profile pictures and product images use Rails Active Storage. In production, set `ACTIVE_STORAGE_SERVICE=s3_compatible` and provide the `S3_*` values for your storage provider. This works with AWS S3, Cloudflare R2, Backblaze B2 S3, MinIO, and similar services.
+
+Recommended production values:
+
+- `ACTIVE_STORAGE_SERVICE=s3_compatible`
+- `S3_REGION=auto` for providers like Cloudflare R2, otherwise use your provider region
+- `S3_FORCE_PATH_STYLE=true` only if your provider requires path-style addressing
+- `S3_PUBLIC=true` when your bucket objects are publicly readable
+
+Product creation and updates can now accept a multipart `image` upload in addition to the legacy `image_url` string.
 
 Email confirmations use Action Mailer. In development, if SMTP is not configured, Rails writes generated emails to `backend/tmp/mails`. SMS confirmations use the generic JSON POST gateway configured by `SMS_API_URL` and `SMS_API_KEY`.
 

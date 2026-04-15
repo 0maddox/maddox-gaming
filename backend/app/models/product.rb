@@ -14,6 +14,7 @@ class Product < ApplicationRecord
 	].freeze
 
 	has_many :reviews, dependent: :destroy
+	has_one_attached :image
 
 	attribute :variants, :json, default: []
 
@@ -28,7 +29,7 @@ class Product < ApplicationRecord
 
 	def stock_status
 		stock_value = stock.to_i
-		threshold = (low_stock_threshold || 5).to_i
+		threshold = (has_attribute?('low_stock_threshold') ? self[:low_stock_threshold] : 5).to_i
 
 		return 'out_of_stock' if stock_value <= 0
 		return 'low_stock' if stock_value <= threshold
@@ -44,8 +45,18 @@ class Product < ApplicationRecord
 		reviews.count
 	end
 
+	def image_url
+		if image.attached?
+			Rails.application.routes.url_helpers.rails_blob_url(image)
+		else
+			self[:image_url]
+		end
+	end
+
 	def as_api_json
 		as_json.merge(
+			'low_stock_threshold' => (has_attribute?('low_stock_threshold') ? self[:low_stock_threshold] : 5),
+			'image_url' => image_url,
 			'stock_status' => stock_status,
 			'average_rating' => average_rating,
 			'ratings_count' => ratings_count

@@ -28,6 +28,22 @@ services:
         value: https
       - key: BASE_URL
         sync: false
+      - key: ACTIVE_STORAGE_SERVICE
+        value: s3_compatible
+      - key: S3_ACCESS_KEY_ID
+        sync: false
+      - key: S3_SECRET_ACCESS_KEY
+        sync: false
+      - key: S3_BUCKET
+        sync: false
+      - key: S3_REGION
+        sync: false
+      - key: S3_ENDPOINT
+        sync: false
+      - key: S3_FORCE_PATH_STYLE
+        value: false
+      - key: S3_PUBLIC
+        value: true
       - key: PAYMENT_BUSINESS_NAME
         value: Maddox Gaming
       - key: FLUTTERWAVE_SECRET

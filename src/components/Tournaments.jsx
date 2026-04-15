@@ -7,6 +7,7 @@ import {
   fetchTournamentMatches,
   fetchTournaments,
 } from '../services/api';
+import { fallbackTournaments } from '../data/fallbackCatalog';
 import { subscribeToLiveUpdates } from '../services/realtime';
 import { useAuth } from '../context/AuthContext';
 
@@ -19,8 +20,9 @@ const currency = new Intl.NumberFormat('en-KE', {
 function Tournaments({ timing = {} }) {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const [tournaments, setTournaments] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [tournaments, setTournaments] = useState(fallbackTournaments);
+  const [loading, setLoading] = useState(false);
+  const [syncing, setSyncing] = useState(true);
   const [error, setError] = useState('');
   const [registeringId, setRegisteringId] = useState(null);
   const [registrationStatus, setRegistrationStatus] = useState({});
@@ -40,17 +42,22 @@ function Tournaments({ timing = {} }) {
         const response = await fetchTournaments();
         const normalized = Array.isArray(response) ? response : [];
         if (mounted) {
-          setTournaments(normalized);
-          setActiveTournamentId((prev) => prev || normalized[0]?.id || null);
-          setError('');
+          if (normalized.length > 0) {
+            setTournaments(normalized);
+            setActiveTournamentId((prev) => prev || normalized[0]?.id || null);
+            setError('');
+          } else {
+            setError('Showing demo tournaments while live events finish loading.');
+          }
         }
       } catch (err) {
         if (mounted) {
-          setError('Unable to load tournaments right now.');
+          setError('Showing demo tournaments while the live API wakes up.');
         }
       } finally {
         if (mounted) {
           setLoading(false);
+          setSyncing(false);
         }
       }
     };
@@ -187,7 +194,8 @@ function Tournaments({ timing = {} }) {
             ))}
           </div>
         ) : null}
-        {!loading && error ? <p className="section-status section-status-error">{error}</p> : null}
+        {syncing ? <p className="section-status">Loading live tournaments...</p> : null}
+        {!loading && error ? <p className="section-status">{error}</p> : null}
 
         <div className="tournaments-row">
           {upcomingTournaments.map((event, index) => (
