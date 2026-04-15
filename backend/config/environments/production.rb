@@ -19,7 +19,24 @@ Rails.application.configure do
   # config.asset_host = "http://assets.example.com"
 
   # Store uploaded files using the configured production storage backend.
-  config.active_storage.service = ENV.fetch('ACTIVE_STORAGE_SERVICE', 's3_compatible').to_sym
+  requested_active_storage_service = ENV['ACTIVE_STORAGE_SERVICE'].to_s.strip
+  requested_active_storage_service = 'local' if requested_active_storage_service.empty?
+
+  s3_required_env_vars = %w[S3_ACCESS_KEY_ID S3_SECRET_ACCESS_KEY S3_BUCKET S3_ENDPOINT]
+
+  if requested_active_storage_service == 's3_compatible'
+    missing_s3_env_vars = s3_required_env_vars.select { |key| ENV[key].to_s.strip.empty? }
+
+    if missing_s3_env_vars.any?
+      warn(
+        "ACTIVE_STORAGE_SERVICE=s3_compatible but missing #{missing_s3_env_vars.join(', ')}; " \
+        "falling back to local storage"
+      )
+      requested_active_storage_service = 'local'
+    end
+  end
+
+  config.active_storage.service = requested_active_storage_service.to_sym
 
   # Assume all access to the app is happening through a SSL-terminating reverse proxy.
   config.assume_ssl = true

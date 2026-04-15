@@ -67,7 +67,9 @@ Card payments require the Flutterwave values. M-Pesa payments require the Daraja
 
 User profile pictures and product images use Rails Active Storage. In production, set `ACTIVE_STORAGE_SERVICE=s3_compatible` and provide the `S3_*` values for your storage provider. This works with AWS S3, Cloudflare R2, Backblaze B2 S3, MinIO, and similar services.
 
-Recommended production values:
+If `ACTIVE_STORAGE_SERVICE` is left unset, or is set to `s3_compatible` without the required `S3_ACCESS_KEY_ID`, `S3_SECRET_ACCESS_KEY`, `S3_BUCKET`, and `S3_ENDPOINT` values, the app now falls back to `local` storage so the web process can boot. On Render this means uploads are ephemeral unless you configure object storage.
+
+Recommended production values when object storage is configured:
 
 - `ACTIVE_STORAGE_SERVICE=s3_compatible`
 - `S3_REGION=auto` for providers like Cloudflare R2, otherwise use your provider region
