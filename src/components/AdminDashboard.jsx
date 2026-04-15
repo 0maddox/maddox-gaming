@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Routes, Route, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import ShopManagement from './admin/ShopManagement';
+import TournamentManagement from './admin/TournamentManagement';
+import FinanceDashboard from './admin/FinanceDashboard';
 
 const runtimeApiUrl =
   typeof window !== 'undefined'
@@ -207,12 +210,26 @@ function AdminDashboard() {
                     ) : <div className="admin-unauthorized">No access to user management.</div>
                   )}
                 />
-                <Route path="tournaments" element={hasPermission('manage_tournaments') ? <h3>Tournament Management</h3> : <div className="admin-unauthorized">No access to tournaments management.</div>} />
+                <Route
+                  path="tournaments"
+                  element={
+                    hasPermission('manage_tournaments')
+                      ? <TournamentManagement />
+                      : <div className="admin-unauthorized">No access to tournaments management.</div>
+                  }
+                />
                 <Route path="posts" element={hasPermission('manage_content') ? <h3>Post Management</h3> : <div className="admin-unauthorized">No access to post management.</div>} />
                 <Route path="events" element={hasPermission('manage_content') ? <h3>Event Management</h3> : <div className="admin-unauthorized">No access to event management.</div>} />
-                <Route path="shop" element={hasPermission('manage_products') ? <h3>Shop Management</h3> : <div className="admin-unauthorized">No access to shop management.</div>} />
-                <Route path="analytics" element={hasPermission('view_analytics') ? <h3>Analytics Dashboard</h3> : <div className="admin-unauthorized">No access to analytics.</div>} />
-                <Route path="finance" element={hasPermission('manage_finance') ? <h3>Finance Management</h3> : <div className="admin-unauthorized">No access to finance.</div>} />
+                <Route
+                  path="shop"
+                  element={
+                    hasPermission('manage_products')
+                      ? <ShopManagement />
+                      : <div className="admin-unauthorized">No access to shop management.</div>
+                  }
+                />
+                <Route path="analytics" element={hasPermission('view_analytics') ? <FinanceDashboard /> : <div className="admin-unauthorized">No access to analytics.</div>} />
+                <Route path="finance" element={hasPermission('manage_finance') ? <FinanceDashboard /> : <div className="admin-unauthorized">No access to finance.</div>} />
               </Routes>
             </div>
           </div>

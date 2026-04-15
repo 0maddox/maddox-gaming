@@ -1,5 +1,5 @@
 class Api::V1::UsersController < ApplicationController
-  skip_before_action :authenticate_request, only: [:create, :login]
+  skip_before_action :authenticate_request, only: [:create, :login, :public_profiles]
   before_action :set_user, only: [:show, :update, :destroy]
   before_action -> { require_permission!('manage_users') }, only: [:index]
 
@@ -13,7 +13,12 @@ class Api::V1::UsersController < ApplicationController
       return render json: { error: 'Forbidden' }, status: :forbidden
     end
 
-    render json: @user.as_json(except: [:password_digest])
+    render json: @user.community_profile_json
+  end
+
+  def public_profiles
+    users = User.order(created_at: :desc).limit(50)
+    render json: users.map { |user| user.community_profile_json.except('email') }
   end
 
   def create
@@ -50,7 +55,7 @@ class Api::V1::UsersController < ApplicationController
     end
 
     if @user.update(attrs)
-      render json: @user.as_json(except: [:password_digest])
+      render json: @user.community_profile_json
     else
       render json: @user.errors, status: :unprocessable_entity
     end

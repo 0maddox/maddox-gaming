@@ -1,7 +1,9 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { fetchProducts } from '../services/api';
+import { useAuth } from '../context/AuthContext';
+import { useCart } from '../context/CartContext';
+import { createProductReview, fetchProductReviews, fetchProducts } from '../services/api';
 import { subscribeToLiveUpdates } from '../services/realtime';
 
 const currency = new Intl.NumberFormat('en-KE', {
@@ -17,6 +19,11 @@ function Products({ timing = {} }) {
   const [error, setError] = useState('');
   const [wishlisted, setWishlisted] = useState({});
   const [cartFeedback, setCartFeedback] = useState({});
+  const [selectedVariants, setSelectedVariants] = useState({});
+  const [reviewsByProduct, setReviewsByProduct] = useState({});
+
+  const { user } = useAuth();
+  const { addToCart } = useCart();
 
   const sectionDelay = timing.sectionDelay ?? 0.12;
   const sectionDuration = timing.sectionDuration ?? 0.55;
@@ -87,7 +94,7 @@ function Products({ timing = {} }) {
   const featuredProducts = useMemo(() => products.slice(0, 8), [products]);
 
   const getProductBadge = (product) => {
-    if (typeof product.stock === 'number' && product.stock <= 5) {
+    if (product.stock_status === 'low_stock') {
       return 'HOT';
     }
 
@@ -100,11 +107,23 @@ function Products({ timing = {} }) {
     return null;
   };
 
-  const getRating = (product) => {
-    if (typeof product.stock === 'number') {
-      return product.stock > 10 ? 5 : 4;
+  const variantOptions = (product) => {
+    if (Array.isArray(product.variants) && product.variants.length > 0) {
+      return product.variants;
     }
-    return 4;
+
+    return [
+      {
+        color: product.color || 'Standard',
+        model: product.variant_model || 'Base',
+        compatibility: product.compatibility || 'Universal',
+      },
+    ];
+  };
+
+  const getSelectedVariant = (product) => {
+    const options = variantOptions(product);
+    return selectedVariants[product.id] || options[0] || {};
   };
 
   const formatPrice = (value) => {
@@ -120,32 +139,106 @@ function Products({ timing = {} }) {
     setWishlisted((prev) => ({ ...prev, [productId]: !prev[productId] }));
   };
 
-  const addToCart = (product) => {
-    const cartKey = 'maddox_cart';
-    const rawCart = localStorage.getItem(cartKey);
-    const parsedCart = rawCart ? JSON.parse(rawCart) : [];
-
-    const itemToAdd = {
-      id: product.id,
-      name: product.name || 'Untitled product',
-      price: product.price,
-      quantity: 1,
-      addedAt: new Date().toISOString(),
-    };
-
-    const existingIndex = parsedCart.findIndex((item) => item.id === itemToAdd.id);
-    if (existingIndex >= 0) {
-      parsedCart[existingIndex].quantity += 1;
-    } else {
-      parsedCart.push(itemToAdd);
-    }
-
-    localStorage.setItem(cartKey, JSON.stringify(parsedCart));
+  const pushToCart = (product) => {
+    const variant = getSelectedVariant(product);
+    addToCart(product, variant);
     setCartFeedback((prev) => ({ ...prev, [product.id]: 'Added to cart' }));
 
     window.setTimeout(() => {
       setCartFeedback((prev) => ({ ...prev, [product.id]: '' }));
     }, 1600);
+  };
+
+  const loadReviews = async (productId) => {
+    setReviewsByProduct((prev) => ({
+      ...prev,
+      [productId]: { ...(prev[productId] || {}), loading: true, error: '' },
+    }));
+
+    try {
+      const payload = await fetchProductReviews(productId);
+      setReviewsByProduct((prev) => ({
+        ...prev,
+        [productId]: {
+          ...(prev[productId] || {}),
+          loading: false,
+          open: true,
+          list: payload.reviews || [],
+          averageRating: payload.average_rating || 0,
+          ratingsCount: payload.ratings_count || 0,
+          form: prev[productId]?.form || { rating: 5, comment: '' },
+        },
+      }));
+    } catch (err) {
+      setReviewsByProduct((prev) => ({
+        ...prev,
+        [productId]: {
+          ...(prev[productId] || {}),
+          loading: false,
+          error: 'Unable to load reviews right now.',
+        },
+      }));
+    }
+  };
+
+  const toggleReviews = (productId) => {
+    const state = reviewsByProduct[productId];
+
+    if (!state?.open && (!state?.list || state.list.length === 0)) {
+      loadReviews(productId);
+      return;
+    }
+
+    setReviewsByProduct((prev) => ({
+      ...prev,
+      [productId]: {
+        ...(prev[productId] || {}),
+        open: !prev[productId]?.open,
+      },
+    }));
+  };
+
+  const updateReviewForm = (productId, patch) => {
+    setReviewsByProduct((prev) => ({
+      ...prev,
+      [productId]: {
+        ...(prev[productId] || {}),
+        form: {
+          rating: prev[productId]?.form?.rating || 5,
+          comment: prev[productId]?.form?.comment || '',
+          ...patch,
+        },
+      },
+    }));
+  };
+
+  const submitReview = async (event, productId) => {
+    event.preventDefault();
+
+    const form = reviewsByProduct[productId]?.form || { rating: 5, comment: '' };
+
+    try {
+      await createProductReview(productId, {
+        rating: Number(form.rating || 5),
+        comment: form.comment || '',
+      });
+      await loadReviews(productId);
+      updateReviewForm(productId, { comment: '', rating: 5 });
+    } catch (err) {
+      setReviewsByProduct((prev) => ({
+        ...prev,
+        [productId]: {
+          ...(prev[productId] || {}),
+          error: err?.response?.data?.error || 'Unable to save review.',
+        },
+      }));
+    }
+  };
+
+  const stockText = (product) => {
+    if (product.stock_status === 'out_of_stock') return 'Out of stock';
+    if (product.stock_status === 'low_stock') return 'Low stock';
+    return 'In stock';
   };
 
   return (
@@ -162,13 +255,23 @@ function Products({ timing = {} }) {
           <h2>Featured Products</h2>
         </div>
 
-        {loading ? <p className="section-status">Loading products...</p> : null}
+        {loading ? (
+          <div className="products-grid-premium" aria-label="Loading products">
+            {[1, 2, 3, 4].map((item) => (
+              <div key={item} className="glass-card skeleton-card" />
+            ))}
+          </div>
+        ) : null}
         {!loading && error ? <p className="section-status section-status-error">{error}</p> : null}
 
         <div className="products-grid-premium">
           {featuredProducts.map((item, index) => {
             const badge = getProductBadge(item);
-            const rating = getRating(item);
+            const options = variantOptions(item);
+            const selected = getSelectedVariant(item);
+            const reviewState = reviewsByProduct[item.id] || {};
+            const averageRating = reviewState.averageRating || item.average_rating || 0;
+            const ratingsCount = reviewState.ratingsCount || item.ratings_count || 0;
 
             return (
             <motion.article
@@ -198,10 +301,98 @@ function Products({ timing = {} }) {
               <div className="product-meta">
                 <h3>{item.name || 'Untitled product'}</h3>
                 <p className="price-text">{formatPrice(item.price)}</p>
-                <p className="rating">{'*'.repeat(rating)}{'.'.repeat(5 - rating)}</p>
+                <p className="rating">Rating: {averageRating.toFixed(1)} / 5 ({ratingsCount})</p>
                 <p className="product-description">{item.description || 'Premium gaming accessory.'}</p>
-                <button type="button" className="btn-gold w-full" onClick={() => addToCart(item)}>Add to Cart</button>
+
+                <div className="product-variant-selectors">
+                  <label htmlFor={`variant-${item.id}`}>Variant</label>
+                  <select
+                    id={`variant-${item.id}`}
+                    value={JSON.stringify(selected)}
+                    onChange={(event) => setSelectedVariants((prev) => ({
+                      ...prev,
+                      [item.id]: JSON.parse(event.target.value),
+                    }))}
+                  >
+                    {options.map((option, optionIndex) => (
+                      <option key={`${item.id}-${optionIndex}`} value={JSON.stringify(option)}>
+                        {[option.color, option.model, option.compatibility].filter(Boolean).join(' / ')}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <p className={`stock-chip stock-${item.stock_status || 'in_stock'}`}>{stockText(item)}</p>
+
+                <div className="product-actions-row">
+                  <button
+                    type="button"
+                    className="btn-gold w-full"
+                    disabled={item.stock_status === 'out_of_stock'}
+                    onClick={() => pushToCart(item)}
+                  >
+                    Add to Cart
+                  </button>
+                  <button type="button" className="btn-outline-gold w-full" onClick={() => navigate('/checkout')}>
+                    Checkout
+                  </button>
+                </div>
                 {cartFeedback[item.id] ? <p className="section-status">{cartFeedback[item.id]}</p> : null}
+
+                <button
+                  type="button"
+                  className="btn-outline-gold w-full mt-2"
+                  onClick={() => toggleReviews(item.id)}
+                >
+                  {reviewState?.open ? 'Hide Reviews' : 'Reviews & Ratings'}
+                </button>
+
+                {reviewState?.open ? (
+                  <div className="reviews-panel">
+                    {reviewState.loading ? <p className="section-status">Loading reviews...</p> : null}
+                    {reviewState.error ? <p className="section-status section-status-error">{reviewState.error}</p> : null}
+
+                    {Array.isArray(reviewState.list) && reviewState.list.length > 0 ? (
+                      <div className="reviews-list">
+                        {reviewState.list.slice(0, 3).map((review) => (
+                          <article key={review.id} className="review-item">
+                            <p className="review-meta">
+                              {review.user?.username || 'Player'} | {review.rating}/5
+                            </p>
+                            <p>{review.comment || 'No comment provided.'}</p>
+                          </article>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="section-status">No reviews yet.</p>
+                    )}
+
+                    {user ? (
+                      <form className="review-form" onSubmit={(event) => submitReview(event, item.id)}>
+                        <label htmlFor={`rating-${item.id}`}>Your rating</label>
+                        <select
+                          id={`rating-${item.id}`}
+                          value={reviewState?.form?.rating || 5}
+                          onChange={(event) => updateReviewForm(item.id, { rating: Number(event.target.value) })}
+                        >
+                          {[5, 4, 3, 2, 1].map((value) => (
+                            <option key={value} value={value}>{value}/5</option>
+                          ))}
+                        </select>
+
+                        <textarea
+                          value={reviewState?.form?.comment || ''}
+                          onChange={(event) => updateReviewForm(item.id, { comment: event.target.value })}
+                          placeholder="Tell others how this product performs"
+                          rows={3}
+                        />
+                        <button type="submit" className="btn-gold w-full">Submit Review</button>
+                      </form>
+                    ) : (
+                      <p className="section-status">Sign in to leave a review.</p>
+                    )}
+                  </div>
+                ) : null}
               </div>
             </motion.article>
             );

@@ -1,0 +1,15 @@
+Hello <%= @user.username.presence || @user.name.presence || 'player' %>,
+
+Your Maddox Gaming order #<%= @order.id %> is now <%= @order.status %>.
+
+Amount: <%= @order.currency %> <%= format('%.2f', @order.total_amount.to_f) %>
+Payment method: <%= @order.payment_method %>
+Gateway: <%= @order.gateway_name %>
+Reference: <%= @order.payment_reference %>
+Transaction ID: <%= @order.transaction_id.presence || 'Pending confirmation' %>
+
+<% if @order.paid? %>
+Thank you for your purchase.
+<% else %>
+Your payment did not complete successfully. Return to checkout to retry.
+<% end %>

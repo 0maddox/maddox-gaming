@@ -5,17 +5,17 @@ class Api::V1::ProductsController < ApplicationController
 
   def index
     @products = Product.all
-    render json: @products
+    render json: @products.map(&:as_api_json)
   end
 
   def show
-    render json: @product
+    render json: @product.as_api_json
   end
 
   def create
     @product = Product.new(product_params)
     if @product.save
-      render json: @product, status: :created
+      render json: @product.as_api_json, status: :created
     else
       render json: @product.errors, status: :unprocessable_entity
     end
@@ -23,7 +23,7 @@ class Api::V1::ProductsController < ApplicationController
 
   def update
     if @product.update(product_params)
-      render json: @product
+      render json: @product.as_api_json
     else
       render json: @product.errors, status: :unprocessable_entity
     end
@@ -41,6 +41,18 @@ class Api::V1::ProductsController < ApplicationController
   end
 
   def product_params
-    params.require(:product).permit(:name, :description, :price, :stock, :category, :image_url)
+    params.require(:product).permit(
+      :name,
+      :description,
+      :price,
+      :stock,
+      :category,
+      :image_url,
+      :low_stock_threshold,
+      :color,
+      :variant_model,
+      :compatibility,
+      variants: [:color, :model, :compatibility]
+    )
   end
 end

@@ -5,11 +5,20 @@ class Api::V1::RegistrationsController < ApplicationController
   end
 
   def create
-    @registration = current_user.registrations.build(registration_params)
+    attrs = registration_params.to_h
+    tournament = Tournament.find_by(id: attrs['tournament_id'] || attrs[:tournament_id])
+    return render json: { error: 'Tournament not found' }, status: :not_found unless tournament
+
+    @registration = Registration.new(registration_params)
+    @registration.user = current_user if tournament.team_mode != 'team'
+
     if @registration.save
-      render json: @registration, status: :created
+      render json: @registration.as_json(include: {
+        user: { only: [:id, :username] },
+        team_profile: { only: [:id, :name, :tag] }
+      }), status: :created
     else
-      render json: @registration.errors, status: :unprocessable_entity
+      render json: { error: @registration.errors.full_messages.join(', ') }, status: :unprocessable_entity
     end
   end
 
@@ -24,6 +33,6 @@ class Api::V1::RegistrationsController < ApplicationController
   private
 
   def registration_params
-    params.require(:registration).permit(:tournament_id)
+    params.require(:registration).permit(:tournament_id, :team_profile_id)
   end
 end

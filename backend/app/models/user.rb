@@ -28,8 +28,19 @@ class User < ApplicationRecord
 
   has_secure_password
   has_one_attached :profile_picture
+  has_one :cart, dependent: :destroy
+  has_many :orders, dependent: :destroy
+  has_many :reviews, dependent: :destroy
+  has_many :player_one_matches, class_name: 'TournamentMatch', foreign_key: :player_one_id, dependent: :nullify
+  has_many :player_two_matches, class_name: 'TournamentMatch', foreign_key: :player_two_id, dependent: :nullify
+  has_many :won_matches, class_name: 'TournamentMatch', foreign_key: :winner_id, dependent: :nullify
   has_many :registrations
   has_many :tournaments, through: :registrations
+  has_many :sent_follows, class_name: 'Follow', foreign_key: :follower_id, dependent: :destroy
+  has_many :received_follows, class_name: 'Follow', foreign_key: :followed_id, dependent: :destroy
+  has_many :discussion_threads, dependent: :destroy
+  has_many :discussion_comments, dependent: :destroy
+  has_many :lft_posts, dependent: :destroy
 
   before_validation :normalize_role
   before_save :sync_admin_flag
@@ -55,6 +66,24 @@ class User < ApplicationRecord
 
   def super_admin?
     role == 'super_admin'
+  end
+
+  def community_profile_json
+    codm_stats = CodmPlayerStat.where(player_name: username).order(updated_at: :desc).first
+    matches_played = player_one_matches.count + player_two_matches.count
+
+    as_json(only: [:id, :username, :email, :role]).merge(
+      'avatar_url' => profile_picture_url,
+      'stats' => {
+        'followers' => received_follows.accepted.count,
+        'following' => sent_follows.accepted.count,
+        'tournaments_joined' => registrations.count,
+        'matches_played' => matches_played,
+        'matches_won' => won_matches.count,
+        'codm_kills' => codm_stats&.kills.to_i,
+        'codm_rank' => codm_stats&.in_game_rank.to_s
+      }
+    )
   end
 
   private

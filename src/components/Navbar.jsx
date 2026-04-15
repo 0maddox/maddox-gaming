@@ -1,9 +1,11 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useCart } from '../context/CartContext';
 
 function Navbar() {
   const { user, logout, hasPermission } = useAuth();
+  const { totalItems } = useCart();
   const navigate = useNavigate();
   const canAccessAdmin = hasPermission('access_admin');
   const canManageTournaments = hasPermission('manage_tournaments');
@@ -27,7 +29,9 @@ function Navbar() {
           <li><Link to="/#tournaments">Tournaments</Link></li>
           <li><Link to="/#about">About</Link></li>
           <li><Link to="/#gallery">Gallery</Link></li>
+          <li><Link to="/community">Community</Link></li>
           <li><Link to="/shop">Shop</Link></li>
+          <li><Link to="/checkout">Cart ({totalItems})</Link></li>
           {user ? <li><Link to="/chat">Chat</Link></li> : null}
           {canManageTournaments ? <li><Link to="/admin/tournaments">Manage Tournaments</Link></li> : null}
           {canManageProducts ? <li><Link to="/admin/shop">Manage Shop</Link></li> : null}

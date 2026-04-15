@@ -46,16 +46,22 @@ const PERMISSIONS = {
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
+  const [authReady, setAuthReady] = useState(false);
 
   useEffect(() => {
     const savedUser = localStorage.getItem(USER_KEY);
-    if (!savedUser) return;
+    if (!savedUser) {
+      setAuthReady(true);
+      return;
+    }
 
     try {
       setUser(JSON.parse(savedUser));
     } catch (error) {
       localStorage.removeItem(USER_KEY);
       localStorage.removeItem(TOKEN_KEY);
+    } finally {
+      setAuthReady(true);
     }
   }, []);
 
@@ -63,6 +69,7 @@ export function AuthProvider({ children }) {
     id: rawUser?.id,
     username: rawUser?.username || rawUser?.name || 'user',
     email: rawUser?.email || fallbackEmail,
+    phoneNumber: rawUser?.phone_number || rawUser?.phoneNumber || '',
     role: rawUser?.role || (rawUser?.admin ? ROLES.SUPER_ADMIN : ROLES.USER),
     admin: Boolean(rawUser?.admin),
     profilePictureUrl: rawUser?.profile_picture_url || null,
@@ -113,7 +120,7 @@ export function AuthProvider({ children }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, logout, hasPermission }}>
+    <AuthContext.Provider value={{ user, authReady, login, logout, hasPermission }}>
       {children}
     </AuthContext.Provider>
   );

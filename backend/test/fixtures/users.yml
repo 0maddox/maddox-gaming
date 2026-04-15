@@ -1,9 +1,15 @@
 # Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
 
 one:
-  name: MyString
-  email: MyString
+  name: Fixture User One
+  username: fixture_one
+  email: fixture-one@example.com
+  phone_number: 0711111111
+  role: user
 
 two:
-  name: MyString
-  email: MyString
+  name: Fixture User Two
+  username: fixture_two
+  email: fixture-two@example.com
+  phone_number: 0722222222
+  role: user

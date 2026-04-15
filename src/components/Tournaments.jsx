@@ -1,7 +1,12 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { createRegistration, fetchTournaments } from '../services/api';
+import {
+  createRegistration,
+  fetchCodmLeaderboard,
+  fetchTournamentMatches,
+  fetchTournaments,
+} from '../services/api';
 import { subscribeToLiveUpdates } from '../services/realtime';
 import { useAuth } from '../context/AuthContext';
 
@@ -19,6 +24,9 @@ function Tournaments({ timing = {} }) {
   const [error, setError] = useState('');
   const [registeringId, setRegisteringId] = useState(null);
   const [registrationStatus, setRegistrationStatus] = useState({});
+  const [activeTournamentId, setActiveTournamentId] = useState(null);
+  const [matchData, setMatchData] = useState({ matches: [] });
+  const [codmData, setCodmData] = useState({ leaderboard: [], teams: [] });
 
   const sectionDelay = timing.sectionDelay ?? 0.2;
   const sectionDuration = timing.sectionDuration ?? 0.62;
@@ -33,6 +41,7 @@ function Tournaments({ timing = {} }) {
         const normalized = Array.isArray(response) ? response : [];
         if (mounted) {
           setTournaments(normalized);
+          setActiveTournamentId((prev) => prev || normalized[0]?.id || null);
           setError('');
         }
       } catch (err) {
@@ -53,8 +62,29 @@ function Tournaments({ timing = {} }) {
   }, []);
 
   useEffect(() => {
+    fetchCodmLeaderboard()
+      .then((data) => setCodmData(data || { leaderboard: [], teams: [] }))
+      .catch(() => {
+        // Keep this non-blocking so tournament cards still render.
+      });
+  }, []);
+
+  useEffect(() => {
+    if (!activeTournamentId) return;
+
+    fetchTournamentMatches(activeTournamentId)
+      .then((data) => setMatchData(data || { matches: [] }))
+      .catch(() => setMatchData({ matches: [] }));
+  }, [activeTournamentId]);
+
+  useEffect(() => {
     const unsubscribe = subscribeToLiveUpdates((event) => {
       if (!event || event.resource !== 'tournament') {
+        if (event?.resource === 'tournament_match' && event?.tournament_id === activeTournamentId) {
+          fetchTournamentMatches(activeTournamentId)
+            .then((data) => setMatchData(data || { matches: [] }))
+            .catch(() => setMatchData({ matches: [] }));
+        }
         return;
       }
 
@@ -84,9 +114,13 @@ function Tournaments({ timing = {} }) {
     return () => {
       unsubscribe();
     };
-  }, []);
+  }, [activeTournamentId]);
 
   const upcomingTournaments = useMemo(() => tournaments.slice(0, 4), [tournaments]);
+  const liveMatches = useMemo(
+    () => (Array.isArray(matchData?.matches) ? matchData.matches : []).filter((item) => item.status !== 'completed').slice(0, 4),
+    [matchData]
+  );
 
   const formatFee = (entryFee) => {
     if (typeof entryFee === 'number') {
@@ -146,7 +180,13 @@ function Tournaments({ timing = {} }) {
           <h2>Tournaments</h2>
         </div>
 
-        {loading ? <p className="section-status">Loading tournaments...</p> : null}
+        {loading ? (
+          <div className="tournaments-row" aria-label="Loading tournaments">
+            {[1, 2, 3].map((item) => (
+              <div key={item} className="glass-card skeleton-card" />
+            ))}
+          </div>
+        ) : null}
         {!loading && error ? <p className="section-status section-status-error">{error}</p> : null}
 
         <div className="tournaments-row">
@@ -162,12 +202,17 @@ function Tournaments({ timing = {} }) {
             >
               <h3>{event.name || 'Untitled tournament'}</h3>
               <p>{formatDate(event.date)}</p>
-              <p>Prize Pool: <strong>Community Sponsored</strong></p>
+              <p>Game: <strong>{event.game_title || 'CODM'}</strong></p>
+              <p>Format: <strong>{event.format_type === 'double_elimination' ? 'Double Elimination' : 'Single Elimination'}</strong></p>
+              <p>Players: <strong>{event.registrations_count || 0}/{event.max_players || 0}</strong></p>
               <p>Entry Fee: <strong>{formatFee(event.entry_fee)}</strong></p>
               <button
                 type="button"
                 className="btn-gold"
-                onClick={() => handleRegister(event.id)}
+                onClick={() => {
+                  setActiveTournamentId(event.id);
+                  handleRegister(event.id);
+                }}
                 disabled={registeringId === event.id}
               >
                 {registeringId === event.id ? 'Registering...' : 'Register Now'}
@@ -177,11 +222,41 @@ function Tournaments({ timing = {} }) {
           ))}
 
           <aside className="glass-card leaderboard-card">
-            <h3>Leaderboard</h3>
+            <h3>CODM Leaderboard</h3>
             <ul>
-              <li>1st PlayerX - 1200 pts</li>
-              <li>2nd Sniper254 - 980 pts</li>
-              <li>3rd GhostKE - 870 pts</li>
+              {(codmData?.leaderboard || []).slice(0, 4).map((player, index) => (
+                <li key={player.id || `${player.player_name}-${index}`}>
+                  {index + 1}. {player.player_name} - {player.kills} kills ({player.win_rate}% WR)
+                </li>
+              ))}
+              {(codmData?.leaderboard || []).length === 0 ? <li>No CODM player stats yet.</li> : null}
+            </ul>
+          </aside>
+        </div>
+
+        <div className="tournaments-row mt-3">
+          <aside className="glass-card leaderboard-card">
+            <h3>Live Match Updates</h3>
+            {activeTournamentId ? <p className="section-status">Tournament #{activeTournamentId}</p> : null}
+            <ul>
+              {liveMatches.map((match) => (
+                <li key={match.id}>
+                  R{match.round_number} #{match.position_in_round} | {match.player_one?.username || 'TBD'} vs {match.player_two?.username || 'TBD'} | {match.status}
+                </li>
+              ))}
+              {liveMatches.length === 0 ? <li>No active matches right now.</li> : null}
+            </ul>
+          </aside>
+
+          <aside className="glass-card leaderboard-card">
+            <h3>Team Profiles</h3>
+            <ul>
+              {(codmData?.teams || []).slice(0, 4).map((team) => (
+                <li key={team.id}>
+                  [{team.tag}] {team.name} | {team.wins}-{team.losses} ({team.win_rate}% WR)
+                </li>
+              ))}
+              {(codmData?.teams || []).length === 0 ? <li>No teams published yet.</li> : null}
             </ul>
           </aside>
         </div>
