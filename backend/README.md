@@ -30,6 +30,14 @@ Copy `.env.example` to your preferred shell environment and set:
 - `PAYMENT_BUSINESS_NAME`
 - `BASE_URL`
 - `ACTIVE_STORAGE_SERVICE`
+- `CLOUDFLARE_R2_ACCESS_KEY_ID`
+- `CLOUDFLARE_R2_SECRET_ACCESS_KEY`
+- `CLOUDFLARE_R2_BUCKET`
+- `CLOUDFLARE_R2_REGION`
+- `CLOUDFLARE_R2_ACCOUNT_ID`
+- `CLOUDFLARE_R2_ENDPOINT`
+- `CLOUDFLARE_R2_FORCE_PATH_STYLE`
+- `CLOUDFLARE_R2_PUBLIC`
 - `S3_ACCESS_KEY_ID`
 - `S3_SECRET_ACCESS_KEY`
 - `S3_BUCKET`
@@ -59,17 +67,29 @@ Copy `.env.example` to your preferred shell environment and set:
 
 Current deployed backend values:
 
-- `BASE_URL=https://maddox-gaming.onrender.com`
-- `APP_HOST=maddox-gaming.onrender.com`
-- `MPESA_CALLBACK_URL=https://maddox-gaming.onrender.com/api/mpesa/callback`
+- `BASE_URL=https://maddox-gaming.com`
+- `CORS_ALLOWED_ORIGINS=https://www.maddox-gaming.com`
+- `APP_HOST=api.maddox-gaming.com`
+- `MPESA_CALLBACK_URL=https://api.maddox-gaming.com/api/mpesa/callback`
 
 Card payments require the Flutterwave values. M-Pesa payments require the Daraja values.
 
-User profile pictures and product images use Rails Active Storage. In production, set `ACTIVE_STORAGE_SERVICE=s3_compatible` and provide the `S3_*` values for your storage provider. This works with AWS S3, Cloudflare R2, Backblaze B2 S3, MinIO, and similar services.
+User profile pictures and product images use Rails Active Storage. In production, you can now set `ACTIVE_STORAGE_SERVICE=cloudflare_r2` and provide the `CLOUDFLARE_R2_*` values, or keep using `ACTIVE_STORAGE_SERVICE=s3_compatible` with the generic `S3_*` values for other providers.
 
-If `ACTIVE_STORAGE_SERVICE` is left unset, or is set to `s3_compatible` without the required `S3_ACCESS_KEY_ID`, `S3_SECRET_ACCESS_KEY`, `S3_BUCKET`, and `S3_ENDPOINT` values, the app now falls back to `local` storage so the web process can boot. On Render this means uploads are ephemeral unless you configure object storage.
+If `ACTIVE_STORAGE_SERVICE` is left unset, or is set to `s3_compatible` without the required `S3_ACCESS_KEY_ID`, `S3_SECRET_ACCESS_KEY`, `S3_BUCKET`, and `S3_ENDPOINT` values, or is set to `cloudflare_r2` without the required `CLOUDFLARE_R2_ACCESS_KEY_ID`, `CLOUDFLARE_R2_SECRET_ACCESS_KEY`, `CLOUDFLARE_R2_BUCKET`, and either `CLOUDFLARE_R2_ENDPOINT` or `CLOUDFLARE_R2_ACCOUNT_ID`, the app falls back to `local` storage so the web process can boot. On Render this means uploads are ephemeral unless you configure object storage.
 
-Recommended production values when object storage is configured:
+Recommended Cloudflare R2 values:
+
+- `ACTIVE_STORAGE_SERVICE=cloudflare_r2`
+- `CLOUDFLARE_R2_ACCESS_KEY_ID=<your R2 access key ID>`
+- `CLOUDFLARE_R2_SECRET_ACCESS_KEY=<your R2 secret access key>`
+- `CLOUDFLARE_R2_BUCKET=<your bucket name>`
+- `CLOUDFLARE_R2_REGION=auto`
+- `CLOUDFLARE_R2_ACCOUNT_ID=<your Cloudflare account ID>`
+- `CLOUDFLARE_R2_ENDPOINT=https://<account-id>.r2.cloudflarestorage.com` if you prefer not to derive it from the account ID
+- `CLOUDFLARE_R2_PUBLIC=true` when objects should be publicly readable
+
+Recommended generic S3-compatible values when object storage is configured:
 
 - `ACTIVE_STORAGE_SERVICE=s3_compatible`
 - `S3_REGION=auto` for providers like Cloudflare R2, otherwise use your provider region
@@ -79,6 +99,8 @@ Recommended production values when object storage is configured:
 Product creation and updates can now accept a multipart `image` upload in addition to the legacy `image_url` string.
 
 Email confirmations use Action Mailer. In development, if SMTP is not configured, Rails writes generated emails to `backend/tmp/mails`. SMS confirmations use the generic JSON POST gateway configured by `SMS_API_URL` and `SMS_API_KEY`.
+
+Background jobs in production default to `solid_queue`, but the adapter can be overridden with `ACTIVE_JOB_QUEUE_ADAPTER`. On Render, this repo now defaults that value to `async` so Active Storage uploads and other backgrounded work do not fail if Solid Queue tables and workers are not provisioned.
 
 ## Current Payment Behavior
 

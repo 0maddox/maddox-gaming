@@ -175,6 +175,25 @@ If you want this README to become portfolio-ready, these are the best screenshot
 
 ## Deployment Steps
 
+### Netlify Frontend
+
+This frontend is ready to deploy to Netlify as a Vite single-page app.
+
+1. Create a new Netlify site from this repository.
+2. Set the base directory to the repository root.
+3. Netlify will use [netlify.toml](netlify.toml) with:
+	- build command: `npm run build`
+	- publish directory: `dist`
+4. Add these Netlify environment variables:
+	- `VITE_API_URL=https://api.maddox-gaming.com/api/v1`
+	- `VITE_CABLE_URL=wss://api.maddox-gaming.com/cable`
+	- `VITE_FLUTTERWAVE_PUBLIC_KEY=<your Flutterwave public key>`
+5. If you use a custom frontend domain such as `maddox-gaming.com`, point that domain to Netlify.
+6. Keep the backend API on Render at `api.maddox-gaming.com`.
+7. After the first deploy, verify that the frontend can load products and authenticate against the API.
+
+The frontend env example is available in [.env.example](.env.example).
+
 ### Render Blueprint
 
 This repo now includes [render.yaml](render.yaml), which defines:
@@ -196,14 +215,14 @@ To use it on Render:
 
 ### Frontend
 
-1. Set production values for `VITE_API_URL` and `VITE_FLUTTERWAVE_PUBLIC_KEY`.
+1. Set production values for `VITE_API_URL`, `VITE_CABLE_URL`, and `VITE_FLUTTERWAVE_PUBLIC_KEY`.
 2. Build the frontend:
 
 ```bash
 npm run build
 ```
 
-3. Deploy the generated `dist/` directory to your static host.
+3. Deploy the generated `dist/` directory to your static host, or use Netlify with [netlify.toml](netlify.toml).
 
 ### Backend
 
@@ -248,12 +267,13 @@ Current deployed backend:
 Frontend:
 
 - `VITE_API_URL`
+- `VITE_CABLE_URL`
 - `VITE_FLUTTERWAVE_PUBLIC_KEY`
 
 Current frontend API target:
 
-- `VITE_API_URL=https://maddox-gaming.onrender.com/api/v1`
-- `VITE_CABLE_URL=wss://maddox-gaming.onrender.com/cable`
+- `VITE_API_URL=https://api.maddox-gaming.com/api/v1`
+- `VITE_CABLE_URL=wss://api.maddox-gaming.com/cable`
 
 ### Payment Requirements In Production
 

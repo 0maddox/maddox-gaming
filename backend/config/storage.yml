@@ -16,6 +16,16 @@ s3_compatible:
   force_path_style: <%= ENV.fetch('S3_FORCE_PATH_STYLE', 'false') == 'true' %>
   public: <%= ENV.fetch('S3_PUBLIC', 'true') == 'true' %>
 
+cloudflare_r2:
+  service: S3
+  access_key_id: <%= ENV['CLOUDFLARE_R2_ACCESS_KEY_ID'] %>
+  secret_access_key: <%= ENV['CLOUDFLARE_R2_SECRET_ACCESS_KEY'] %>
+  region: <%= ENV.fetch('CLOUDFLARE_R2_REGION', 'auto') %>
+  bucket: <%= ENV['CLOUDFLARE_R2_BUCKET'] %>
+  endpoint: <%= ENV['CLOUDFLARE_R2_ENDPOINT'].presence || (ENV['CLOUDFLARE_R2_ACCOUNT_ID'].present? ? "https://#{ENV['CLOUDFLARE_R2_ACCOUNT_ID']}.r2.cloudflarestorage.com" : nil) %>
+  force_path_style: <%= ENV.fetch('CLOUDFLARE_R2_FORCE_PATH_STYLE', 'false') == 'true' %>
+  public: <%= ENV.fetch('CLOUDFLARE_R2_PUBLIC', 'true') == 'true' %>
+
 # Use bin/rails credentials:edit to set the AWS secrets (as aws:access_key_id|secret_access_key)
 # amazon:
 #   service: S3

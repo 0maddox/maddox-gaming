@@ -23,13 +23,33 @@ services:
           name: maddox-gaming-db
           property: connectionString
       - key: APP_HOST
-        sync: false
+        value: api.maddox-gaming.com
       - key: APP_PROTOCOL
         value: https
       - key: BASE_URL
-        sync: false
+        value: https://maddox-gaming.com
+      - key: CORS_ALLOWED_ORIGINS
+        value: https://www.maddox-gaming.com
       - key: ACTIVE_STORAGE_SERVICE
-        value: local
+        value: cloudflare_r2
+      - key: CLOUDFLARE_R2_ACCESS_KEY_ID
+        sync: false
+      - key: CLOUDFLARE_R2_SECRET_ACCESS_KEY
+        sync: false
+      - key: CLOUDFLARE_R2_BUCKET
+        sync: false
+      - key: CLOUDFLARE_R2_REGION
+        value: auto
+      - key: CLOUDFLARE_R2_ACCOUNT_ID
+        sync: false
+      - key: CLOUDFLARE_R2_ENDPOINT
+        sync: false
+      - key: CLOUDFLARE_R2_FORCE_PATH_STYLE
+        value: false
+      - key: CLOUDFLARE_R2_PUBLIC
+        value: true
+      - key: ACTIVE_JOB_QUEUE_ADAPTER
+        value: async
       - key: S3_ACCESS_KEY_ID
         sync: false
       - key: S3_SECRET_ACCESS_KEY
@@ -61,7 +81,7 @@ services:
       - key: MPESA_PASSKEY
         sync: false
       - key: MPESA_CALLBACK_URL
-        sync: false
+        value: https://api.maddox-gaming.com/api/mpesa/callback
       - key: MPESA_API_BASE_URL
         value: https://api.safaricom.co.ke
       - key: MAILER_FROM_ADDRESS
@@ -86,6 +106,8 @@ services:
         sync: false
       - key: SMS_SENDER_ID
         sync: false
+      - key: SOLID_QUEUE_IN_PUMA
+        value: false
 
 databases:
   - name: maddox-gaming-db

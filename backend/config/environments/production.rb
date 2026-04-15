@@ -23,6 +23,7 @@ Rails.application.configure do
   requested_active_storage_service = 'local' if requested_active_storage_service.empty?
 
   s3_required_env_vars = %w[S3_ACCESS_KEY_ID S3_SECRET_ACCESS_KEY S3_BUCKET S3_ENDPOINT]
+  cloudflare_r2_required_env_vars = %w[CLOUDFLARE_R2_ACCESS_KEY_ID CLOUDFLARE_R2_SECRET_ACCESS_KEY CLOUDFLARE_R2_BUCKET]
 
   if requested_active_storage_service == 's3_compatible'
     missing_s3_env_vars = s3_required_env_vars.select { |key| ENV[key].to_s.strip.empty? }
@@ -30,6 +31,20 @@ Rails.application.configure do
     if missing_s3_env_vars.any?
       warn(
         "ACTIVE_STORAGE_SERVICE=s3_compatible but missing #{missing_s3_env_vars.join(', ')}; " \
+        "falling back to local storage"
+      )
+      requested_active_storage_service = 'local'
+    end
+  elsif requested_active_storage_service == 'cloudflare_r2'
+    missing_cloudflare_r2_env_vars = cloudflare_r2_required_env_vars.select { |key| ENV[key].to_s.strip.empty? }
+
+    if ENV['CLOUDFLARE_R2_ENDPOINT'].to_s.strip.empty? && ENV['CLOUDFLARE_R2_ACCOUNT_ID'].to_s.strip.empty?
+      missing_cloudflare_r2_env_vars << 'CLOUDFLARE_R2_ENDPOINT or CLOUDFLARE_R2_ACCOUNT_ID'
+    end
+
+    if missing_cloudflare_r2_env_vars.any?
+      warn(
+        "ACTIVE_STORAGE_SERVICE=cloudflare_r2 but missing #{missing_cloudflare_r2_env_vars.join(', ')}; " \
         "falling back to local storage"
       )
       requested_active_storage_service = 'local'
@@ -64,8 +79,12 @@ Rails.application.configure do
   config.cache_store = :solid_cache_store
 
   # Replace the default in-process and non-durable queuing backend for Active Job.
-  config.active_job.queue_adapter = :solid_queue
-  config.solid_queue.connects_to = { database: { writing: :queue } }
+  active_job_queue_adapter = ENV.fetch('ACTIVE_JOB_QUEUE_ADAPTER', 'solid_queue').to_s
+  config.active_job.queue_adapter = active_job_queue_adapter.to_sym
+
+  if active_job_queue_adapter == 'solid_queue'
+    config.solid_queue.connects_to = { database: { writing: :queue } }
+  end
 
   # Ignore bad email addresses and do not raise email delivery errors.
   # Set this to true and configure the email server for immediate delivery to raise delivery errors.
