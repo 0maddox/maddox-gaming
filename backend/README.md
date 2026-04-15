@@ -4,6 +4,8 @@ Rails API for Maddox Gaming storefront, community features, and payment orchestr
 
 ## Payment Endpoints
 
+- `POST /api/mpesa/pay`: dedicated Daraja STK initiation endpoint.
+- `POST /api/mpesa/callback`: Daraja callback receiver alias.
 - `POST /api/v1/checkouts`: create a pending order and return payment configuration.
 - `POST /api/v1/checkouts/:id/verify`: verify a Flutterwave transaction from the backend.
 - `GET /api/v1/orders`: list the current user’s recent orders.
@@ -20,6 +22,7 @@ Copy `.env.example` to your preferred shell environment and set:
 - `FLUTTERWAVE_WEBHOOK_SECRET_HASH`
 - `FLUTTERWAVE_API_URL`
 - `PAYMENT_BUSINESS_NAME`
+- `BASE_URL`
 - `MPESA_CONSUMER_KEY`
 - `MPESA_SECRET`
 - `MPESA_SHORTCODE`
@@ -39,6 +42,12 @@ Copy `.env.example` to your preferred shell environment and set:
 - `SMS_API_URL`
 - `SMS_API_KEY`
 - `SMS_SENDER_ID`
+
+Current deployed backend values:
+
+- `BASE_URL=https://maddox-gaming.onrender.com`
+- `APP_HOST=maddox-gaming.onrender.com`
+- `MPESA_CALLBACK_URL=https://maddox-gaming.onrender.com/api/mpesa/callback`
 
 Card payments require the Flutterwave values. M-Pesa payments require the Daraja values.
 

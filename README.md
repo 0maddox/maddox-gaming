@@ -74,7 +74,7 @@ src/                 React frontend
 backend/             Rails API backend
 public/              Static frontend assets
 scripts/             Smoke and utility scripts
-build/               Frontend production build output
+dist/                Vite production build output
 ```
 
 ## Local Development Setup
@@ -83,8 +83,14 @@ build/               Frontend production build output
 
 Copy `.env.example` to `.env` and configure:
 
-- `REACT_APP_API_URL`
-- `REACT_APP_FLUTTERWAVE_PUBLIC_KEY`
+- `VITE_API_URL`
+- `VITE_FLUTTERWAVE_PUBLIC_KEY`
+- `VITE_CABLE_URL` if needed.
+
+The example file is already pointed at the deployed backend:
+
+- `VITE_API_URL=https://maddox-gaming.onrender.com/api/v1`
+- `VITE_CABLE_URL=wss://maddox-gaming.onrender.com/cable`
 
 ### 2. Backend Environment
 
@@ -94,6 +100,12 @@ See [backend/README.md](backend/README.md) and `backend/.env.example` for:
 - Daraja credentials for M-Pesa STK Push.
 - SMTP settings for email confirmations.
 - SMS provider settings for SMS confirmations.
+
+The backend examples use these deployed defaults:
+
+- `BASE_URL=https://maddox-gaming.onrender.com`
+- `APP_HOST=maddox-gaming.onrender.com`
+- `MPESA_CALLBACK_URL=https://maddox-gaming.onrender.com/api/mpesa/callback`
 
 ### 3. Install Dependencies
 
@@ -177,25 +189,26 @@ To use it on Render:
 2. In Render, create a new Blueprint instance from the repo.
 3. Let Render create the API service, frontend service, and PostgreSQL database from `render.yaml`.
 4. Fill in the environment variables marked with `sync: false`.
-5. After the frontend deploys, set `FRONTEND_URL` and `BASE_URL` on the backend to the real Render domains or your custom domains.
-6. Set `REACT_APP_API_URL` on the frontend to the backend Render URL plus `/api/v1`.
-7. Redeploy both services after env vars are set.
+5. Set `BASE_URL=https://maddox-gaming.onrender.com` on the backend unless you move to a custom domain.
+6. If you later host a separate frontend, add its origin through `CORS_ALLOWED_ORIGINS` on the backend.
+7. Set `VITE_API_URL=https://maddox-gaming.onrender.com/api/v1` on the frontend.
+8. Redeploy the affected services after env vars are set.
 
 ### Frontend
 
-1. Set production values for `REACT_APP_API_URL` and `REACT_APP_FLUTTERWAVE_PUBLIC_KEY`.
+1. Set production values for `VITE_API_URL` and `VITE_FLUTTERWAVE_PUBLIC_KEY`.
 2. Build the frontend:
 
 ```bash
 npm run build
 ```
 
-3. Deploy the generated `build/` directory to your static host.
+3. Deploy the generated `dist/` directory to your static host.
 
 ### Backend
 
 1. Set production environment variables for Flutterwave, Daraja, SMTP, and SMS.
-2. Configure `APP_HOST` and `APP_PROTOCOL` correctly.
+2. Configure `APP_HOST=maddox-gaming.onrender.com` and `APP_PROTOCOL=https`.
 3. Run database migrations in production.
 4. Deploy the Rails API.
 5. Register the production webhook and callback URLs with Flutterwave and Daraja.
@@ -206,7 +219,6 @@ Backend:
 
 - `APP_HOST`
 - `BASE_URL`
-- `FRONTEND_URL`
 - `FLUTTERWAVE_SECRET`
 - `FLUTTERWAVE_WEBHOOK_SECRET_HASH`
 - `MPESA_CONSUMER_KEY`
@@ -219,14 +231,29 @@ Backend:
 - `SMTP_DOMAIN`
 - `SMTP_USERNAME`
 - `SMTP_PASSWORD`
+
+Optional:
+
+- `CORS_ALLOWED_ORIGINS` for any browser origins beyond local development and `BASE_URL`
 - `SMS_API_URL`
 - `SMS_API_KEY`
 - `SMS_SENDER_ID`
 
+Current deployed backend:
+
+- `BASE_URL=https://maddox-gaming.onrender.com`
+- `APP_HOST=maddox-gaming.onrender.com`
+- `MPESA_CALLBACK_URL=https://maddox-gaming.onrender.com/api/mpesa/callback`
+
 Frontend:
 
-- `REACT_APP_API_URL`
-- `REACT_APP_FLUTTERWAVE_PUBLIC_KEY`
+- `VITE_API_URL`
+- `VITE_FLUTTERWAVE_PUBLIC_KEY`
+
+Current frontend API target:
+
+- `VITE_API_URL=https://maddox-gaming.onrender.com/api/v1`
+- `VITE_CABLE_URL=wss://maddox-gaming.onrender.com/cable`
 
 ### Payment Requirements In Production
 

@@ -1,11 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-
-const runtimeApiUrl =
-  typeof window !== 'undefined'
-    ? `${window.location.protocol}//${window.location.hostname}:3000/api/v1`
-    : 'http://localhost:3000/api/v1';
-
-const API_URL = process.env.REACT_APP_API_URL || runtimeApiUrl;
+import { API_URL } from '../../config/env';
 
 const parseVariantLines = (text) => {
   return String(text || '')

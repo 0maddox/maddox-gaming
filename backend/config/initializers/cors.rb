@@ -6,13 +6,19 @@
 # Read more: https://github.com/cyu/rack-cors
 
 allowed_origins = [
-  'http://localhost:3001',
-  'http://127.0.0.1:3001',
-  'http://localhost:3000',
-  'http://127.0.0.1:3000',
-  ENV['FRONTEND_URL'],
-  ENV['BASE_URL']
+	'http://localhost:3001',
+	'http://127.0.0.1:3001',
+	'http://localhost:3000',
+	'http://127.0.0.1:3000',
+	ENV['BASE_URL']
 ].compact.uniq
+
+extra_origins = ENV.fetch('CORS_ALLOWED_ORIGINS', '')
+	.split(',')
+	.map(&:strip)
+	.reject(&:empty?)
+
+allowed_origins.concat(extra_origins).uniq!
 
 Rails.application.config.middleware.insert_before 0, Rack::Cors do
 	allow do

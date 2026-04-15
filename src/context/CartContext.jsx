@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useEffect, useMemo, useState } from 'react';
-import { createCheckout, fetchCart, syncCart, verifyCheckout } from '../services/api';
+import { createCheckout, createMpesaPayment, fetchCart, syncCart, verifyCheckout } from '../services/api';
 import { useAuth } from './AuthContext';
 
 const CartContext = createContext();
@@ -173,6 +173,19 @@ export function CartProvider({ children }) {
     return response;
   };
 
+  const payWithMpesa = async ({ phoneNumber, customerName, customerEmail }) => {
+    const payloadItems = items.map(toServerItem);
+
+    const response = await createMpesaPayment({
+      items: payloadItems,
+      phone_number: phoneNumber,
+      customer_name: customerName,
+      customer_email: customerEmail,
+    });
+
+    return response;
+  };
+
   const confirmPayment = async (orderId, txRef) => {
     const response = await verifyCheckout(orderId, {
       tx_ref: txRef,
@@ -206,6 +219,7 @@ export function CartProvider({ children }) {
     removeFromCart,
     clearCart,
     checkout,
+    payWithMpesa,
     confirmPayment,
     itemSignature,
   };

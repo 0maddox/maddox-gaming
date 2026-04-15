@@ -86,6 +86,6 @@ class Api::V1::UsersController < ApplicationController
   end
 
   def encode_token(payload)
-    JWT.encode(payload, Rails.application.secret_key_base)
+    JWT.encode(payload, ENV['JWT_SECRET'].presence || Rails.application.secret_key_base)
   end
 end

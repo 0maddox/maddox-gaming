@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
+import { API_URL } from '../config/env';
 
 const AuthContext = createContext();
-const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:3000/api/v1';
 const TOKEN_KEY = 'token';
 const USER_KEY = 'auth_user';
 

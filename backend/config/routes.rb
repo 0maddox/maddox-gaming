@@ -1,5 +1,7 @@
 Rails.application.routes.draw do
   mount ActionCable.server => '/cable'
+  post '/api/mpesa/pay', to: 'api/mpesa#pay'
+  post '/api/mpesa/callback', to: 'api/v1/payment_webhooks#mpesa_callback'
 
   namespace :api do
     namespace :v1 do

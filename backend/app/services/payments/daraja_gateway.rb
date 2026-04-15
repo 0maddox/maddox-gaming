@@ -8,10 +8,10 @@ module Payments
 
     def initialize(
       consumer_key: ENV['MPESA_CONSUMER_KEY'],
-      consumer_secret: ENV['MPESA_SECRET'],
+      consumer_secret: ENV['MPESA_SECRET'].presence || ENV['MPESA_CONSUMER_SECRET'],
       shortcode: ENV['MPESA_SHORTCODE'],
       passkey: ENV['MPESA_PASSKEY'],
-      callback_url: ENV['MPESA_CALLBACK_URL']
+      callback_url: ENV['MPESA_CALLBACK_URL'].presence || default_callback_url
     )
       @consumer_key = consumer_key.to_s
       @consumer_secret = consumer_secret.to_s
@@ -45,7 +45,7 @@ module Payments
     def validate_configuration!
       missing = []
       missing << 'MPESA_CONSUMER_KEY' if @consumer_key.blank?
-      missing << 'MPESA_SECRET' if @consumer_secret.blank?
+      missing << 'MPESA_SECRET or MPESA_CONSUMER_SECRET' if @consumer_secret.blank?
       missing << 'MPESA_SHORTCODE' if @shortcode.blank?
       missing << 'MPESA_PASSKEY' if @passkey.blank?
       missing << 'MPESA_CALLBACK_URL' if @callback_url.blank?
@@ -99,6 +99,13 @@ module Payments
 
     def api_base_url
       ENV.fetch('MPESA_API_BASE_URL', 'https://sandbox.safaricom.co.ke')
+    end
+
+    def default_callback_url
+      base_url = ENV['BASE_URL'].to_s.sub(%r{/\z}, '')
+      return nil if base_url.empty?
+
+      "#{base_url}/api/mpesa/callback"
     end
   end
 end

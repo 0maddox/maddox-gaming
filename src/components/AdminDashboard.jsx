@@ -4,13 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import ShopManagement from './admin/ShopManagement';
 import TournamentManagement from './admin/TournamentManagement';
 import FinanceDashboard from './admin/FinanceDashboard';
-
-const runtimeApiUrl =
-  typeof window !== 'undefined'
-    ? `${window.location.protocol}//${window.location.hostname}:3000/api/v1`
-    : 'http://localhost:3000/api/v1';
-
-const API_URL = process.env.REACT_APP_API_URL || runtimeApiUrl;
+import { API_URL } from '../config/env';
 
 function AdminDashboard() {
   const [users, setUsers] = useState([]);

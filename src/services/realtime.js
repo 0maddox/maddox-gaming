@@ -1,11 +1,5 @@
 import { createConsumer } from '@rails/actioncable';
-
-const runtimeCableUrl =
-  typeof window !== 'undefined'
-    ? `${window.location.protocol === 'https:' ? 'wss' : 'ws'}://${window.location.hostname}:3000/cable`
-    : 'ws://localhost:3000/cable';
-
-const CABLE_URL = process.env.REACT_APP_CABLE_URL || runtimeCableUrl;
+import { CABLE_URL } from '../config/env';
 
 let cableConsumer;
 

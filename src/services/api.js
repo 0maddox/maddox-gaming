@@ -1,11 +1,7 @@
 import axios from 'axios';
+import { API_URL } from '../config/env';
 
-const runtimeApiUrl =
-  typeof window !== 'undefined'
-    ? `${window.location.protocol}//${window.location.hostname}:3000/api/v1`
-    : 'http://localhost:3000/api/v1';
-
-const API_URL = process.env.REACT_APP_API_URL || runtimeApiUrl;
+const MPESA_PAY_URL = API_URL.replace(/\/api\/v1\/?$/, '/api/mpesa/pay');
 
 const api = axios.create({
   baseURL: API_URL,
@@ -56,6 +52,14 @@ export const syncCart = async (items) => {
 export const createCheckout = async (payload) => {
   const token = localStorage.getItem('token');
   const response = await api.post('/checkouts', payload, {
+    headers: token ? { Authorization: `Bearer ${token}` } : {},
+  });
+  return response.data;
+};
+
+export const createMpesaPayment = async (payload) => {
+  const token = localStorage.getItem('token');
+  const response = await axios.post(MPESA_PAY_URL, payload, {
     headers: token ? { Authorization: `Bearer ${token}` } : {},
   });
   return response.data;

@@ -8,7 +8,7 @@ class ApplicationController < ActionController::API
     header = request.headers['Authorization']
     token = header.split(' ').last if header
     begin
-      @decoded = JWT.decode(token, Rails.application.secret_key_base, true, algorithm: 'HS256')
+      @decoded = JWT.decode(token, jwt_secret, true, algorithm: 'HS256')
       @current_user = User.find(@decoded[0]['user_id'])
     rescue JWT::DecodeError, ActiveRecord::RecordNotFound
       render json: { error: 'Unauthorized' }, status: :unauthorized
@@ -19,5 +19,9 @@ class ApplicationController < ActionController::API
     return if current_user&.can?(permission)
 
     render json: { error: 'Forbidden' }, status: :forbidden
+  end
+
+  def jwt_secret
+    ENV['JWT_SECRET'].presence || Rails.application.secret_key_base
   end
 end

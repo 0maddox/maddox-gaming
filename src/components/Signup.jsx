@@ -1,12 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-
-const runtimeApiUrl =
-  typeof window !== 'undefined'
-    ? `${window.location.protocol}//${window.location.hostname}:3000/api/v1`
-    : 'http://localhost:3000/api/v1';
-
-const API_URL = process.env.REACT_APP_API_URL || runtimeApiUrl;
+import { API_URL } from '../config/env';
 
 function Signup() {
   const [formData, setFormData] = useState({

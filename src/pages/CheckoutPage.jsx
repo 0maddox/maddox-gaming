@@ -3,6 +3,7 @@ import { closePaymentModal, useFlutterwave } from 'flutterwave-react-v3';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
+import { FLUTTERWAVE_PUBLIC_KEY } from '../config/env';
 import { fetchOrders, retryOrderPayment } from '../services/api';
 
 const currency = new Intl.NumberFormat('en-KE', {
@@ -20,6 +21,7 @@ function CheckoutPage() {
     updateQuantity,
     removeFromCart,
     checkout,
+    payWithMpesa,
     confirmPayment,
     itemSignature,
     syncError,
@@ -37,7 +39,7 @@ function CheckoutPage() {
   const [recentOrders, setRecentOrders] = useState([]);
   const [retryingOrderId, setRetryingOrderId] = useState(null);
 
-  const flutterwavePublicKey = process.env.REACT_APP_FLUTTERWAVE_PUBLIC_KEY || '';
+  const flutterwavePublicKey = FLUTTERWAVE_PUBLIC_KEY;
 
   const shippingFee = useMemo(() => (subtotal > 0 ? 250 : 0), [subtotal]);
   const grandTotal = subtotal + shippingFee;
@@ -107,7 +109,7 @@ function CheckoutPage() {
     }
 
     if (!flutterwavePublicKey) {
-      setCheckoutError('Flutterwave public key is missing. Set REACT_APP_FLUTTERWAVE_PUBLIC_KEY before taking payments.');
+      setCheckoutError('Flutterwave public key is missing. Set VITE_FLUTTERWAVE_PUBLIC_KEY before taking payments.');
       setSubmitting(false);
       setLaunchPaymentModal(false);
       return;
@@ -153,13 +155,19 @@ function CheckoutPage() {
     let openedFlutterwave = false;
 
     try {
-      const result = await checkout({
-        phoneNumber,
-        paymentMethod,
-        paymentProvider: paymentMethod === 'mpesa' ? 'daraja' : 'flutterwave',
-        customerName,
-        customerEmail,
-      });
+      const result = paymentMethod === 'mpesa'
+        ? await payWithMpesa({
+            phoneNumber,
+            customerName,
+            customerEmail,
+          })
+        : await checkout({
+            phoneNumber,
+            paymentMethod,
+            paymentProvider: 'flutterwave',
+            customerName,
+            customerEmail,
+          });
 
       setCheckoutResult(result);
 
