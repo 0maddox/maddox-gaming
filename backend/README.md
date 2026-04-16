@@ -67,10 +67,10 @@ Copy `.env.example` to your preferred shell environment and set:
 
 Current deployed backend values:
 
-- `BASE_URL=https://maddox-gaming.com`
-- `CORS_ALLOWED_ORIGINS=https://www.maddox-gaming.com`
-- `APP_HOST=api.maddox-gaming.com`
-- `MPESA_CALLBACK_URL=https://api.maddox-gaming.com/api/mpesa/callback`
+- `BASE_URL=https://maddox-gaming.netlify.app`
+- `CORS_ALLOWED_ORIGINS=`
+- `APP_HOST=maddox-gaming.onrender.com`
+- `MPESA_CALLBACK_URL=https://maddox-gaming.onrender.com/api/mpesa/callback`
 
 Card payments require the Flutterwave values. M-Pesa payments require the Daraja values.
 

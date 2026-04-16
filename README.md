@@ -185,11 +185,11 @@ This frontend is ready to deploy to Netlify as a Vite single-page app.
 	- build command: `npm run build`
 	- publish directory: `dist`
 4. Add these Netlify environment variables:
-	- `VITE_API_URL=https://api.maddox-gaming.com/api/v1`
-	- `VITE_CABLE_URL=wss://api.maddox-gaming.com/cable`
+	- `VITE_API_URL=https://maddox-gaming.onrender.com/api/v1`
+	- `VITE_CABLE_URL=wss://maddox-gaming.onrender.com/cable`
 	- `VITE_FLUTTERWAVE_PUBLIC_KEY=<your Flutterwave public key>`
-5. If you use a custom frontend domain such as `maddox-gaming.com`, point that domain to Netlify.
-6. Keep the backend API on Render at `api.maddox-gaming.com`.
+5. The current live frontend host is `https://maddox-gaming.netlify.app`.
+6. Keep the backend API on Render at `https://maddox-gaming.onrender.com` unless you buy and configure a custom domain later.
 7. After the first deploy, verify that the frontend can load products and authenticate against the API.
 
 The frontend env example is available in [.env.example](.env.example).
@@ -208,7 +208,7 @@ To use it on Render:
 2. In Render, create a new Blueprint instance from the repo.
 3. Let Render create the API service, frontend service, and PostgreSQL database from `render.yaml`.
 4. Fill in the environment variables marked with `sync: false`.
-5. Set `BASE_URL=https://maddox-gaming.onrender.com` on the backend unless you move to a custom domain.
+5. Set `BASE_URL=https://maddox-gaming.netlify.app` on the backend for the current live frontend origin.
 6. If you later host a separate frontend, add its origin through `CORS_ALLOWED_ORIGINS` on the backend.
 7. Set `VITE_API_URL=https://maddox-gaming.onrender.com/api/v1` on the frontend.
 8. Redeploy the affected services after env vars are set.
@@ -260,7 +260,7 @@ Optional:
 
 Current deployed backend:
 
-- `BASE_URL=https://maddox-gaming.onrender.com`
+- `BASE_URL=https://maddox-gaming.netlify.app`
 - `APP_HOST=maddox-gaming.onrender.com`
 - `MPESA_CALLBACK_URL=https://maddox-gaming.onrender.com/api/mpesa/callback`
 
@@ -272,8 +272,13 @@ Frontend:
 
 Current frontend API target:
 
-- `VITE_API_URL=https://api.maddox-gaming.com/api/v1`
-- `VITE_CABLE_URL=wss://api.maddox-gaming.com/cable`
+- `VITE_API_URL=https://maddox-gaming.onrender.com/api/v1`
+- `VITE_CABLE_URL=wss://maddox-gaming.onrender.com/cable`
+
+Current live frontend and backend hosts:
+
+- `https://maddox-gaming.netlify.app`
+- `https://maddox-gaming.onrender.com`
 
 ### Payment Requirements In Production
 

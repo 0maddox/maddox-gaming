@@ -23,13 +23,13 @@ services:
           name: maddox-gaming-db
           property: connectionString
       - key: APP_HOST
-        value: api.maddox-gaming.com
+        value: maddox-gaming.onrender.com
       - key: APP_PROTOCOL
         value: https
       - key: BASE_URL
-        value: https://maddox-gaming.com
+        value: https://maddox-gaming.netlify.app
       - key: CORS_ALLOWED_ORIGINS
-        value: https://www.maddox-gaming.com
+        value: ""
       - key: ACTIVE_STORAGE_SERVICE
         value: cloudflare_r2
       - key: CLOUDFLARE_R2_ACCESS_KEY_ID
@@ -81,7 +81,7 @@ services:
       - key: MPESA_PASSKEY
         sync: false
       - key: MPESA_CALLBACK_URL
-        value: https://api.maddox-gaming.com/api/mpesa/callback
+        value: https://maddox-gaming.onrender.com/api/mpesa/callback
       - key: MPESA_API_BASE_URL
         value: https://api.safaricom.co.ke
       - key: MAILER_FROM_ADDRESS
