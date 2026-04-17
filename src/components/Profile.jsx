@@ -1,10 +1,12 @@
 import React, { useEffect, useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { uploadFileDirect } from '../services/directUpload';
 import { fetchMyProfile, updateMyProfile } from '../services/api';
 
 function Profile() {
-  const { user, syncUser } = useAuth();
+  const navigate = useNavigate();
+  const { user, logout, syncUser } = useAuth();
   const [profile, setProfile] = useState(null);
   const [selectedFile, setSelectedFile] = useState(null);
   const [previewUrl, setPreviewUrl] = useState('');
@@ -83,6 +85,11 @@ function Profile() {
     }
   };
 
+  const handleLogout = () => {
+    logout();
+    navigate('/login');
+  };
+
   return (
     <div className="page-shell py-4">
       <div className="content-container">
@@ -112,6 +119,9 @@ function Profile() {
               </button>
               {status ? <p className="section-status">{status}</p> : null}
               {error ? <p className="section-status section-status-error">{error}</p> : null}
+            </div>
+            <div className="profile-actions">
+              <button type="button" className="btn-outline-gold" onClick={handleLogout}>Logout</button>
             </div>
             <p>XP: {xpData.xp} | Level {xpData.level}</p>
             <div className="xp-progress-wrap">

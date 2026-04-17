@@ -11,6 +11,8 @@ const Chat = lazy(() => import('./components/Chat'));
 const Shop = lazy(() => import('./components/Shop'));
 const AdminDashboard = lazy(() => import('./components/AdminDashboard'));
 const Login = lazy(() => import('./components/Login'));
+const ForgotPassword = lazy(() => import('./components/ForgotPassword'));
+const ResetPassword = lazy(() => import('./components/ResetPassword'));
 const Signup = lazy(() => import('./components/Signup'));
 const CheckoutPage = lazy(() => import('./pages/CheckoutPage'));
 const CommunityPage = lazy(() => import('./pages/CommunityPage'));
@@ -33,6 +35,8 @@ function App() {
             <Routes location={location}>
               <Route path="/" element={<Home />} />
               <Route path="/login" element={<Login />} />
+              <Route path="/forgot-password" element={<ForgotPassword />} />
+              <Route path="/reset-password" element={<ResetPassword />} />
               <Route path="/signup" element={<Signup />} />
               <Route path="/profile" element={<Profile />} />
               <Route path="/chat" element={<Chat />} />

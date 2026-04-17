@@ -64,6 +64,9 @@ function Login() {
               placeholder="Enter your password"
               required
             />
+            <div className="auth-helper-row">
+              <Link to="/forgot-password" className="auth-inline-link">Forgot password?</Link>
+            </div>
           </div>
 
           <div className="auth-button-row">

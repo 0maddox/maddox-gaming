@@ -8,6 +8,7 @@ Rails.application.routes.draw do
   namespace :api do
     namespace :v1 do
       post '/login', to: 'users#login'
+      resources :password_resets, only: [:create, :update], param: :token
       resources :direct_uploads, only: [:create]
       get '/users/public_profiles', to: 'users#public_profiles'
       get '/shop_feed', to: 'shop_feed#index'

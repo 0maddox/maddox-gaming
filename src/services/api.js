@@ -12,6 +12,19 @@ export const fetchProducts = async () => {
   return response.data;
 };
 
+export const requestPasswordReset = async (email) => {
+  const response = await api.post('/password_resets', { email });
+  return response.data;
+};
+
+export const resetPassword = async (token, password, passwordConfirmation) => {
+  const response = await api.patch(`/password_resets/${token}`, {
+    password,
+    password_confirmation: passwordConfirmation,
+  });
+  return response.data;
+};
+
 export const fetchProductReviews = async (productId) => {
   const response = await api.get(`/products/${productId}/reviews`);
   return response.data;

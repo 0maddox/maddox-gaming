@@ -33,7 +33,7 @@ class Api::V1::UsersController < ApplicationController
   end
 
   def login
-    @user = User.find_by(email: params[:email])
+    @user = User.find_by_normalized_email(params[:email])
     if @user && @user.authenticate(params[:password])
       token = encode_token({ user_id: @user.id })
       render json: { user: @user.as_api_json, token: token }

@@ -1,0 +1,1 @@
+typeof window<`u`&&`${window.location.protocol}${window.location.hostname}`,typeof window<`u`&&(window.location.protocol,`${window.location.hostname}`);var e=`https://maddox-gaming.onrender.com/api/v1`,t=`wss://maddox-gaming.onrender.com/cable`,n=`FLWPUBK_TEST-7f73dc08673f3e63c4af43ecff277952-X`;export{t as n,n as r,e as t};

@@ -14,6 +14,12 @@ Rails API for Maddox Gaming storefront, community features, and payment orchestr
 - `POST /api/v1/payments/flutterwave/webhook`: webhook receiver for Flutterwave confirmation.
 - `POST /api/v1/payments/mpesa/callback`: callback receiver for Daraja STK confirmation.
 
+## Auth Endpoints
+
+- `POST /api/v1/login`: email/password sign-in.
+- `POST /api/v1/password_resets`: request a password reset email.
+- `PATCH /api/v1/password_resets/:token`: submit a new password from the reset link.
+
 ## Upload Endpoints
 
 - `POST /api/v1/direct_uploads`: create a signed direct-upload payload for Active Storage.
@@ -64,6 +70,8 @@ Copy `.env.example` to your preferred shell environment and set:
 - `SMS_API_URL`
 - `SMS_API_KEY`
 - `SMS_SENDER_ID`
+
+`BASE_URL` is also used to build password-reset links sent by email, so it should point at the frontend host.
 
 Current deployed backend values:
 

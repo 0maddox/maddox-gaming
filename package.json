@@ -2,10 +2,13 @@
   "name": "maddox-gaming",
   "version": "0.1.0",
   "private": true,
+  "engines": {
+    "node": ">=20.19.0"
+  },
   "dependencies": {
     "@popperjs/core": "^2.11.8",
     "@rails/actioncable": "^8.0.200",
-    "@rails/activestorage": "^8.1.300",
+    "@rails/activestorage": "^8.0.200",
     "axios": "^1.7.9",
     "bootstrap": "^5.3.3",
     "flutterwave-react-v3": "^1.3.3",
@@ -19,7 +22,8 @@
     "dev": "vite --host 0.0.0.0 --port 3001",
     "build": "vite build",
     "preview": "vite preview --host 0.0.0.0 --port 3001",
-    "test": "vitest"
+    "test": "vitest",
+    "smoke:frontend": "npm run build && vitest run src/pages/CheckoutPage.smoke.test.jsx"
   },
   "browserslist": {
     "production": [
@@ -34,16 +38,18 @@
     ]
   },
   "devDependencies": {
+    "@vitejs/plugin-react": "^4.4.1",
     "@babel/plugin-proposal-private-property-in-object": "^7.21.11",
-    "@testing-library/jest-dom": "^6.9.1",
-    "@testing-library/react": "^16.3.2",
-    "@testing-library/user-event": "^14.6.1",
-    "@vitejs/plugin-react": "^6.0.1",
-    "jsdom": "^29.0.2",
+    "jsdom": "^26.1.0",
     "playwright": "^1.59.1",
     "sass": "^1.x.x",
     "sass-loader": "^13.x.x",
-    "vite": "^8.0.8",
-    "vitest": "^4.1.4"
+    "vite": "^6.3.5",
+    "vitest": "^3.1.2"
+  },
+  "env": {
+    "VITE_API_URL": "https://maddox-gaming.onrender.com/api/v1",
+    "VITE_CABLE_URL": "wss://maddox-gaming.onrender.com/cable",
+    "VITE_FLUTTERWAVE_PUBLIC_KEY": "FLWPUBK_TEST-7f73dc08673f3e63c4af43ecff277952-X"
   }
 }

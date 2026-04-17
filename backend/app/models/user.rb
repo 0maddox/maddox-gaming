@@ -1,4 +1,9 @@
+require 'digest'
+require 'securerandom'
+
 class User < ApplicationRecord
+  PASSWORD_RESET_WINDOW = 2.hours.freeze
+
   ROLES = %w[
     user
     support_agent
@@ -42,6 +47,7 @@ class User < ApplicationRecord
   has_many :discussion_comments, dependent: :destroy
   has_many :lft_posts, dependent: :destroy
 
+  before_validation :normalize_email
   before_validation :normalize_role
   before_save :sync_admin_flag
 
@@ -52,6 +58,8 @@ class User < ApplicationRecord
   validates :phone_number, presence: true,
             format: { with: /\A(?:\+254|0)[17]\d{8}\z/,
                       message: 'must be a valid Kenyan phone number' }
+
+  scope :with_password_reset_digest, ->(digest) { where(password_reset_token_digest: digest) }
 
   def as_api_json
     as_json(except: [:password_digest]).merge(
@@ -101,7 +109,43 @@ class User < ApplicationRecord
     'user'
   end
 
+  def self.find_by_normalized_email(email)
+    normalized_email = email.to_s.strip.downcase
+    find_by('LOWER(email) = ?', normalized_email)
+  end
+
+  def self.find_by_password_reset_token(token)
+    return if token.blank?
+
+    with_password_reset_digest(digest_password_reset_token(token)).first
+  end
+
+  def generate_password_reset_token!
+    token = SecureRandom.urlsafe_base64(32)
+    update!(
+      password_reset_token_digest: self.class.digest_password_reset_token(token),
+      password_reset_sent_at: Time.current
+    )
+    token
+  end
+
+  def password_reset_token_valid?
+    password_reset_token_digest.present? && password_reset_sent_at.present? && password_reset_sent_at >= PASSWORD_RESET_WINDOW.ago
+  end
+
+  def clear_password_reset_token!
+    update_columns(password_reset_token_digest: nil, password_reset_sent_at: nil)
+  end
+
   private
+
+  def self.digest_password_reset_token(token)
+    Digest::SHA256.hexdigest(token.to_s)
+  end
+
+  def normalize_email
+		self.email = email.to_s.strip.downcase
+  end
 
   def normalize_role
 		self.role = resolved_role if has_attribute?('role')
