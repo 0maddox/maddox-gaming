@@ -132,6 +132,8 @@ bundle config set --local path vendor/bundle
 bundle install
 ```
 
+On Render, the backend service start command in [render.yaml](render.yaml) now runs `db:prepare` and `db:seed` before Puma boots, so the super-admin seed and production-safe cleanup happen automatically on deploy.
+
 ## Tests
 
 ```bash
