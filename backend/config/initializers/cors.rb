@@ -14,7 +14,8 @@ allowed_origins = [
 	'http://127.0.0.1:5173',
 	'http://localhost:4173',
 	'http://127.0.0.1:4173',
-	ENV['BASE_URL']
+	ENV['BASE_URL'],
+	%r{\Ahttps://[a-z0-9-]+--maddox-gaming\.netlify\.app\z}
 ].compact.uniq
 
 extra_origins = ENV.fetch('CORS_ALLOWED_ORIGINS', '')
